@@ -5,6 +5,8 @@
 define( [
           "external/jquery/jquery",
           "external/jquery-ui/jquery-ui.min",
+          "external/jquery-ui/jquery.event.drag-2.0",
+          "external/jquery-ui/jquery.event.drop-2.0",
           "core/trackevent",
           "core/track",
           "core/eventmanager",
@@ -19,6 +21,8 @@ define( [
         function(
           $,
           $ui,
+          drag,
+          drop,
           TrackEvent, 
           Track, 
           EventManager,
@@ -28,7 +32,8 @@ define( [
           TimeBar,
           ZoomBar,
           Status,
-          TrackHandles ){
+          TrackHandles
+        ){
 
   var ZOOM_FACTOR = 100;
 
@@ -42,6 +47,7 @@ define( [
         _trackliner,
         _tracks = {},
         _selectedTracks = [],
+        _selectedEvents = [],
         _initialized = false,
         _hScrollBar,
         _vScrollBar,
@@ -155,31 +161,37 @@ define( [
     } //onTrackEventMouseOut
 
     function onTrackEventMouseDown( e ){
-      var trackEvent = e.trackEvent,
-          corn = trackEvent.popcornOptions,
-          originalEvent = e.originalEvent;
+      var start = +new Date();
+      e.originalEvent.target.addEventListener( "mouseup", function(){
+        var trackEvent = e.trackEvent,
+            corn = trackEvent.popcornOptions,
+            originalEvent = e.originalEvent,
+            end = +new Date(),
+            timeElapsed = end - start;
 
-      if( _trackEventHighlight === "click" && corn.target ){
-        blinkTarget( corn.target );
-      } //if
+        if ( timeElapsed >= 100 && timeElapsed <= 300 ) {
+          if( _trackEventHighlight === "click" && corn.target ){ blinkTarget( corn.target );
+          } //if
 
-      if( trackEvent.selected === true && originalEvent.shiftKey && _selectedTracks.length > 1 ){
-        trackEvent.selected = false;
-      }
-      else {
-        trackEvent.selected = true;
-        if( !originalEvent.shiftKey ){
-          for( var t in _tracks ){
-            if( _tracks.hasOwnProperty( t ) ){
-              _tracks[ t ].deselectEvents( trackEvent );
+          if( trackEvent.selected === true && originalEvent.shiftKey && _selectedTracks.length > 1 ){
+            trackEvent.selected = false;
+          }
+          else {
+            trackEvent.selected = true;
+            if( !originalEvent.shiftKey ){
+              for( var t in _tracks ){
+                if( _tracks.hasOwnProperty( t ) ){
+                  _tracks[ t ].deselectEvents( trackEvent );
+                } //if
+              } //for
+              _selectedEvents = [ trackEvent ];
+            }
+            else {
+              _selectedEvents.push( trackEvent );
             } //if
-          } //for
-          _selectedEvents = [ trackEvent ];
+          } //if
         }
-        else {
-          _selectedEvents.push( trackEvent );
-        } //if
-      } //if
+    });
     } //onTrackEventSelected
 
     function addTrack( bTrack ){

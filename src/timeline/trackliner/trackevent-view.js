@@ -156,18 +156,47 @@ define( [ "core/logger", "core/eventmanager" ], function( Logger, EventManager )
       _element.removeAttribute( "selected" );
     } //deselect
 
+    function dragInit( e, dd ) {
+      var selectedEvents = $( "div[selected=true]" ),
+          leftPositions = [],
+          lowestLeft,
+          p = $.event.special.drag.callback.prototype;
+
+      for ( var idx = 0; idx < selectedEvents.length; idx++ )  {
+        leftPositions.push( $( selectedEvents[ idx ] ).position().left );
+      }
+
+      p.lowestLeft = Math.min.apply( Math, leftPositions );
+
+      return selectedEvents;
+    }
+
+    function dragStart( e, dd ) {
+      var container = $( _element.parentNode.parentNode );
+      dd.limit = container.position();
+      dd.limit.left = dd.limit.left + $( this ).position().left - dd.lowestLeft;
+      dd.limit.bottom = dd.limit.top + container.outerHeight() - $( this ).outerHeight();
+      dd.limit.right = dd.limit.left + container.outerWidth() - $( this ).outerWidth();
+    }
+
+    function drag( e, dd ) {
+      $( this ).css({
+        top: Math.min( dd.limit.bottom, Math.max( dd.limit.top, dd.deltaY ) ),
+        left: Math.min( dd.limit.right, Math.max( dd.limit.left, dd.offsetX ) )
+      });
+    }
+
     var handles;
     this.activate = function(){
       if( !handles ) {
-        $( _element ).draggable({
-          containment: _element.parentNode.parentNode,
-          zIndex: 9001,
-          scroll: true,
-          // this is when an event stops being dragged
-          start: function ( event, ui ) {
-          },
-          stop: movedCallback
-        }).resizable({ 
+        $( _element ).css({
+          zIndex: 9001
+        })
+        .drag( "init", dragInit )
+        .drag( "start", dragStart )
+        .drag( "end", movedCallback )
+        .drag( drag, { relative: true } )
+        .resizable({
           autoHide: false, 
           containment: "parent", 
           handles: "e, w", 
