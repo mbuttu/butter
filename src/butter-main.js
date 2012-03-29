@@ -56,11 +56,27 @@
         } //if
       } //checkMedia
 
-      function addTrackEventCommand ( options ){
-        var track = options.track,
-            trackEvent;
-
+      function makeCommand( command ) {
         return {
+          // Executes the command and then
+          // registers it with the _undoManager
+          execute: function(){
+            command.execute();
+            _undoManager.register({
+              execute: command.execute,
+              undo: command.undo
+            });
+          }
+          // Does not return undo,
+          // undo should only be done by the _undoManager
+        };
+      };
+
+      // This command can be used by the UI
+      function addTrackEventCommand( options ) {
+        var track = options.track, trackEvent;
+
+        return makeCommand({
           execute: function(){
             trackEvent = track.addTrackEvent({
               type: options.type,
@@ -71,7 +87,12 @@
           undo: function(){
             track.removeTrackEvent( trackEvent );
           }
-        };
+        });
+      };
+
+      // This function can be used in the code base
+      this.addTrackEvent = function( options ){
+        return addTrackEventCommand( options ).execute();
       };
 
       document.addEventListener( "keydown", function( e ){
@@ -82,12 +103,6 @@
           _undoManager.undo();
         }
       });
-
-      this.addTrackEvent = function( options ){
-        var commandAddTrackEvent = addTrackEventCommand( options );
-        _undoManager.register( commandAddTrackEvent );
-        return commandAddTrackEvent.execute();
-      }
 
       this.getManifest = function ( name ) {
         checkMedia();
