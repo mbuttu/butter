@@ -237,14 +237,13 @@ define( [
         defaultTarget = butter.targets[ 0 ];
       } //if
 
-      var trackEvent = butter.addTrackEvent({
-        track: track,
-        type: type,
+      var trackEvent = track.addTrackEvent({
         popcornOptions: {
           start: start,
           end: start + 1,
           target: defaultTarget.elementID
-        }
+        },
+        type: type
       });
 
       if( defaultTarget ){

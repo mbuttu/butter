@@ -82,7 +82,7 @@ function(
 
     function onTrackAdded( e ){
       var trackView = e.data.view;
-      _container.insertBefore( trackView.element, _container.children[ e.data.order ] );
+      _container.appendChild( trackView.element );
       trackView.duration = _media.duration;
       trackView.zoom = _zoom;
       trackView.parent = _this;

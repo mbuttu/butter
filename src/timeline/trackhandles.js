@@ -32,11 +32,7 @@ define( [
     _container.appendChild( _addTrackButton );
 
     _addTrackButton.addEventListener( "click", function( e ){
-
-    butter.addTrack({
-      media: butter.currentMedia
-    });
-
+      butter.currentMedia.addTrack();
     }, false );
 
     var _sortable = DragNDrop.sortable( _listElement, {
@@ -74,10 +70,7 @@ define( [
             },
             submit: function( e ){
               if( e.data === true ){
-                butter.removeTrack({
-                  media: media,
-                  track: track
-                });
+                media.removeTrack( track );
               } //if
               dialog.close();
             },
@@ -168,7 +161,7 @@ define( [
 
       _sortable.addItem( trackDiv );
 
-      _listElement.insertBefore( trackDiv, _listElement.children[ e.data.order ] );
+      _listElement.appendChild( trackDiv );
 
       _tracks[ trackId ] = {
         id: trackId,

@@ -3,7 +3,7 @@ define( [ "ui/page-element", "ui/logo-spinner", "util/lang", "text!layouts/media
 
   var DEFAULT_SUBTITLE = "Supports HTML5 video, YouTube, and Vimeo";
 
-  return function( butter, media, options ){
+  return function( media, options ){
     var _media = media,
         _pageElement,
         _onDropped = options.onDropped || function(){},
@@ -31,13 +31,10 @@ define( [ "ui/page-element", "ui/logo-spinner", "util/lang", "text!layouts/media
 
     function changeUrl(){
       if(testUrl(urlTextbox.value)){
-        subtitle.className = "form-field-notes form-ok";
+          subtitle.className = "form-field-notes form-ok";
         subtitle.innerHTML = "URL changed.";
         urlTextbox.className = "url form-ok";
-        butter.changeMediaUrl({
-          media: media,
-          newUrl: urlTextbox.value
-        });
+        media.url = urlTextbox.value;
       }
       else{
         subtitle.className += " form-error";
