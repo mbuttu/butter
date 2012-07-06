@@ -1,0 +1,59 @@
+<!--  This Source Code Form is subject to the terms of the MIT license
+      If a copy of the MIT license was not distributed with this file, you can
+      obtain one at http://www.mozillapopcorn.org/butter-license.txt -->
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Event Editor</title>
+    <link rel="stylesheet" href="quiz-style.css">
+    <script type="text/javascript" src="../../../../editors/editor.js"></script>
+    <script type="text/javascript" src="quiz-editor.js"></script>
+    <style>
+      ul {
+        list-style-type: none;
+      }
+      .question-container {
+        /* border: 1px solid black; */
+      }
+      /* li { */
+      /*   padding: 10px 10px; */
+      /* } */
+    </style>
+  </head>
+  <body>
+    <table>
+      <tr>
+        <td>Start Time</td>
+        <td><input id="start" type="text"/></td>
+      </tr>
+      <tr>
+        <td>End Time</td>
+        <td><input id="end" type="text"/></td>
+      </tr>
+      <tr>
+        <td>Target</td>
+        <td><select id="target"></select></td>
+      </tr>
+      <tr>
+        <td>Paginate</td>
+        <td><input id="paginate" type="checkbox" /><td>
+      </tr>
+      <tr>
+        <td>Show Results</td>
+        <td><input id="results" type="checkbox" /><td>
+      </tr>
+      <tr>
+        <td>Questions <button id="addQuestion">+</button></td>
+        <td>
+          <div id="questions"></div>
+        </td>
+      </tr>
+    </table>
+
+    <table>
+      <tbody id="answers"></tbody>
+    </table>
+    <div id="message"></div>
+  </body>
+</html>
