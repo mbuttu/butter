@@ -1,0 +1,27 @@
+{
+  "name": "quiz",
+  "title": "Quiz",
+  "template": "index.html",
+  "baseDir": "../../../",
+  "savedDataUrl": "saved-data.json",
+  "editor": {
+    "quiz": "{{baseDir}}templates/supported/quiz/editors/quiz-editor.html",
+    "default": "{{baseDir}}editors/default-editor.html"
+  },
+  "plugin": {
+    "plugins": [
+      {
+        "type": "quiz",
+        "path": "{{baseDir}}templates/supported/quiz/plugins/popcorn.quiz.js"
+      },
+      {
+        "type": "text",
+        "path": "{{baseDir}}external/popcorn-js/plugins/text/popcorn.text.js"
+      }
+    ],
+    "defaults" : [
+      "quiz",
+      "text"
+    ]
+  }
+}
