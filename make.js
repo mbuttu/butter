@@ -200,10 +200,8 @@ function build( version ){
   sed('-i', '@VERSION@', version, 'dist/butter.js');
   sed('-i', '@VERSION@', version, 'dist/butter.min.js');
 
-  // Compress CSS for deployment
-  lessToCSS( true );
-
-  cp( BUTTER_CSS_FILE, DIST_DIR );
+  //exec(STYLUS + ' css');
+  cp('css/*.css', DIST_DIR);
 }
 
 target.build = function(){
