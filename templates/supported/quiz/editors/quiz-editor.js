@@ -4,7 +4,7 @@
 
   var _this = this,
       _rootElement = rootElement,
-      _fields = [ "target", "paginate", "results", "questions", "answers", "start", "end" ],
+      _fields = [ "target", "paginate", "results", "questions", "start", "end" ],
       _messageContainer = _rootElement.querySelector( "div.error-message" ),
       _targets,
       _trackEvent,
@@ -90,17 +90,16 @@
         textarea = document.createElement( "textarea" ),
         ul = document.createElement( "ul" ),
         li = document.createElement( "li" ),
-        id = "answer-" +  ( _popcornOptions.questions.length + "-0" ),
         input = document.createElement( "input" ),
-        label = document.createElement( "label" ),
         select = document.createElement( "select" ),
         addButton = document.createElement( "button" ),
         removeQuestionButton = document.createElement( "button" ),
         removeAnswerButton = document.createElement( "button" );
 
     ul.setAttribute( "style", "list-style-type: none; display: inline; padding: 0" );
-    textarea.setAttribute( "style", "width: 150px" );
+    textarea.setAttribute( "style", "width: 130px" );
     questionDiv.setAttribute( "style", "padding-top: 20px; padding-bottom: 20px" );
+    input.setAttribute( "style", "float: none; width: 100px" );
     addButton.innerHTML = "+";
     removeQuestionButton.innerHTML = "-";
     removeAnswerButton.innerHTML = "-";
@@ -109,28 +108,22 @@
     removeQuestionButton.addEventListener( "click", removeQuestion( removeQuestionButton, _elements.questions, questionDiv ), false );
 
     textarea.innerHTML = "Question";
-    input.setAttribute( "id", id );
     input.value = "Answer";
-    label.setAttribute( "for", id );
-    label.innerHTML = "1";
     li.appendChild( input );
     li.appendChild( removeAnswerButton );
     li.appendChild( addButton );
 
-    id = "correct-" + _popcornOptions.questions.length;
-    select.setAttribute( "id", id );
-    label = document.createElement( "label" );
-    label.setAttribute( "for", id );
-    label.innerHTML = "Correct Answer";
+    var labelDiv = document.createElement( "div" );
+    labelDiv.setAttribute( "class", "trackevent-property default input" );
+    labelDiv.innerHTML = "Correct Answer";
 
     ul.appendChild( li );
 
-    questionDiv.setAttribute( "id", "question-" + _popcornOptions.questions.length );
     questionDiv.appendChild( textarea );
     questionDiv.appendChild( removeQuestionButton );
 
     questionDiv.appendChild( ul );
-    questionDiv.appendChild( label );
+    questionDiv.appendChild( labelDiv );
     questionDiv.appendChild( select );
 
     _rootElement.querySelector( "#questions" ).appendChild( questionDiv );
@@ -140,21 +133,15 @@
   function addAnswer( aAddButton, aUl, aLi, aIdx, answersIdx ){
     return function( e ){
       var removeButton = document.createElement( "button" ),
-          len = aUl.children.length,
-          id;
+          len = aUl.children.length;
 
       removeButton.innerHTML = "-";
       aLi.removeChild( aLi.lastChild );
 
-      id = "answer-" + aIdx + "-" + len;
-
       aLi = document.createElement( "li" );
       input = document.createElement( "input" );
       input.setAttribute( "type", "text" );
-      input.id = id;
-      answerLabel = document.createElement( "label" );
-      answerLabel.setAttribute( "for", id );
-      answerLabel.innerHTML = len + 1;
+      input.setAttribute( "style", "float: none; width: 100px" );
 
       removeButton.addEventListener( "click", removeAnswer( removeButton, aUl, aLi, aIdx, answersIdx + 1 ), false );
 
@@ -169,7 +156,7 @@
 
   function removeAnswer( aAddButton, aUl, aLi, aIdx, aAnswersIdx ){
     return function( e ){
-      var addButton, previousInput, previousLabel, previousLi, id, currentLi, currentLabel, currentInput, count;
+      var addButton, previousInput, previousLabel, previousLi, currentLi, currentLabel, currentInput, count;
 
       if ( aUl.lastChild !== aUl.firstChild ){
         if ( aUl.lastChild === aLi ){
@@ -177,19 +164,15 @@
           addButton = document.createElement( "button" );
           addButton.innerHTML = "+";
           addButton.addEventListener( "click", addAnswer( addButton, aUl, aUl.lastChild, aIdx, aAnswersIdx ), false );
-          id = "answer-" + aIdx + "-" + aAnswersIdx;
           previousInput = aUl.lastChild.querySelectorAll( "input" )[ 0 ];
-          previousInput.setAttribute( "id", id );
           aUl.lastChild.appendChild( addButton );
         }
         else{
           currentLi = aLi;
           count = aAnswersIdx;
           while ( ( currentLi = currentLi.nextSibling ) ){
-            id = "answer-" + aIdx + "-" + count;
             count += 1;
             currentInput = currentLi.querySelectorAll( "input" )[ 0 ];
-            currentInput.setAttribute( "id", id );
           }
           aUl.removeChild( aLi );
         }
@@ -209,31 +192,26 @@
 
   function onEditorOpen( e ){
     function createQuestionsRow(){
-      var question, answersDiv, questionContainer, theQuestion, answerLabel, id, input, ul, li, addButton, removeButton, idx, answersIdx, removeQuestionButton;
+      var question, answersDiv, questionContainer, theQuestion, input, ul, li, addButton, removeButton, idx, answersIdx, removeQuestionButton;
 
       // questions.setAttribute( "class", "question-container" );
 
       for ( idx = 0; idx < _popcornOptions.questions.length; idx++){
         questionContainer = document.createElement( "div" );
         questionContainer.setAttribute( "style", "padding-top: 20px; padding-bottom: 20px" );
-        questionContainer.id = "question-" + idx;
         answersDiv = document.createElement( "div" );
         theQuestion = _popcornOptions.questions[ idx ];
         question = document.createElement( "textarea" );
         question.innerHTML = theQuestion.question;
         ul = document.createElement( "ul" );
         ul.setAttribute( "style", "list-style-type: none; display: inline; padding: 0" );
-        question.setAttribute( "style", "width: 150px" );
+        question.setAttribute( "style", "width: 130px" );
         for ( answersIdx = 0; answersIdx < theQuestion.answers.length; answersIdx++ ){
           li = document.createElement( "li" );
           input = document.createElement( "input" );
           input.setAttribute( "type", "text" );
-          id = "answer-" + idx + "-" + answersIdx;
-          input.id = id;
+          input.setAttribute( "style", "float: none; width: 100px" );
           input.value = theQuestion.answers[ answersIdx ];
-          answerLabel = document.createElement( "label" );
-          answerLabel.setAttribute( "for", id );
-          answerLabel.innerHTML = answersIdx + 1;
           li.appendChild( input );
           removeButton = document.createElement( "button" );
           removeButton.innerHTML = "-";
@@ -257,13 +235,12 @@
         questionContainer.appendChild( ul );
 
         var correct = document.createElement( "select" ),
-            label = document.createElement( "label" );
+            labelDiv = document.createElement( "div" );
 
-        correct.setAttribute( "id", "correct-" + idx );
-        label.innerHTML = "Correct Answer";
-        label.setAttribute( "for", "correct-" + idx );
+        labelDiv.setAttribute( "class", "trackevent-property default input" );
+        labelDiv.innerHTML = "Correct Answer";
 
-        questionContainer.appendChild( label );
+        questionContainer.appendChild( labelDiv );
         questionContainer.appendChild( correct );
 
         _elements.questions.appendChild( questionContainer );
@@ -286,12 +263,15 @@
     _elements.target.value = _trackEvent.popcornOptions.target;
 
     for ( questionsIdx = 0; questionsIdx < _popcornOptions.questions.length; questionsIdx++ ){
-      answers = _popcornOptions.questions[ questionsIdx ] && _popcornOptions.questions[ questionsIdx ].answers || [];
+      var questions = _rootElement.querySelectorAll( "#questions > div" ),
+          answers = _popcornOptions.questions[ questionsIdx ] && _popcornOptions.questions[ questionsIdx ].answers || [],
+          answersDropdown;
+
       for ( idx = 0; idx < answers.length; idx++ ){
         input = document.createElement( "option" );
         input.appendChild( document.createTextNode( answers[ idx ] ) );
         input.value = answers[ idx ];
-        answersDropdown = _rootElement.querySelector( "#correct-" + questionsIdx );
+        answersDropdown = questions[ questionsIdx ].querySelector( "select" );
         answersDropdown.appendChild( input );
         answersDropdown.addEventListener( "change", function( e ){
           update();
