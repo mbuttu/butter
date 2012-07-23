@@ -345,7 +345,6 @@
         options._container.style.display = "none";
       },
       _teardown: function( options ) {
-        console.log(options.target);
         document.getElementById( options.target ) && document.getElementById( options.target ).removeChild( options._container );
       }
     };

@@ -1,20 +1,39 @@
-document.addEventListener( "DOMContentLoaded", function() {
+(function( Butter ) {
 
-  var _comm = new window.Comm(),
+  Butter.Editor.register( "quiz", "load!{{baseDir}}/templates/supported/quiz/editors/quiz-editor.html", function( rootElement, butter ) {
+
+  var _this = this,
+      _rootElement = rootElement,
       fields = [ "target", "paginate", "results", "questions", "answers", "start", "end" ],
+      _messageContainer = _rootElement.querySelector( "div.error-message" ),
+      _targets,
+      _trackEvent,
       elements = {},
       popcornOptions = {},
       start, end, name, idx;
 
   for ( idx = 0; idx < fields.length; idx++ ) {
     name = fields[ idx ];
-    elements[ name ] = document.getElementById( name );
+    elements[ name ] = _rootElement.querySelector( "#" + name );
     elements[ name ].addEventListener( "change", function( e ) {
       update( false );
     }, false);
   }
 
-  document.getElementById( "addQuestion" ).addEventListener( "click", function( e ) {
+  function setErrorState ( message ) {
+    if ( message ) {
+      _messageContainer.innerHTML = message;
+      _messageContainer.parentNode.style.visibility = "visible";
+      _messageContainer.parentNode.classList.add( "open" );
+    }
+    else {
+      _messageContainer.innerHTML = "";
+      _messageContainer.parentNode.style.visibility = "";
+      _messageContainer.parentNode.classList.remove( "open" );
+    }
+  }
+
+  _rootElement.querySelector( "#addQuestion" ).addEventListener( "click", function( e ){
     var questionDiv = document.createElement( "div" ),
         textarea = document.createElement( "textarea" ),
         ul = document.createElement( "ul" ),
@@ -27,6 +46,9 @@ document.addEventListener( "DOMContentLoaded", function() {
         removeQuestionButton = document.createElement( "button" ),
         removeAnswerButton = document.createElement( "button" );
 
+    ul.setAttribute( "style", "list-style-type: none; display: inline; padding: 0" );
+    textarea.setAttribute( "style", "width: 150px" );
+    questionDiv.setAttribute( "style", "padding-top: 20px; padding-bottom: 20px" );
     addButton.innerHTML = "+";
     removeQuestionButton.innerHTML = "-";
     removeAnswerButton.innerHTML = "-";
@@ -39,7 +61,6 @@ document.addEventListener( "DOMContentLoaded", function() {
     input.value = "Answer";
     label.setAttribute( "for", id );
     label.innerHTML = "1";
-    // li.appendChild( label );
     li.appendChild( input );
     li.appendChild( removeAnswerButton );
     li.appendChild( addButton );
@@ -53,7 +74,6 @@ document.addEventListener( "DOMContentLoaded", function() {
     ul.appendChild( li );
 
     questionDiv.setAttribute( "id", "question-" + popcornOptions.questions.length );
-    // questionDiv.appendChild( document.createTextNode( "Question " + ( popcornOptions.questions.length + 1 ) ) );
     questionDiv.appendChild( textarea );
     questionDiv.appendChild( removeQuestionButton );
 
@@ -61,16 +81,16 @@ document.addEventListener( "DOMContentLoaded", function() {
     questionDiv.appendChild( label );
     questionDiv.appendChild( select );
 
-    document.getElementById( "questions" ).appendChild( questionDiv );
+    _rootElement.querySelector( "#questions" ).appendChild( questionDiv );
     update( false );
   }, false);
 
   function update( alsoClose ) {
-    var questions = document.getElementById( "questions" ).children,
+    var questions = _rootElement.querySelector( "#questions" ).children,
         idx, answersIdx;
 
     alsoClose = !!alsoClose;
-    document.getElementById( "message" ).innerHTML = "";
+    setErrorState( false );
 
     for ( idx = 0; idx < fields.length; idx ++ ) {
       var field = fields[ idx ],
@@ -89,13 +109,11 @@ document.addEventListener( "DOMContentLoaded", function() {
       popcornOptions.questions[ idx ].question = questions[ idx ].querySelectorAll( "textarea" )[ 0 ].value;
       possibleAnswers = questions[ idx ].querySelectorAll( "select" )[ 0 ];
       popcornOptions.questions[ idx ].correctAnswer = possibleAnswers.selectedIndex;
-      // var answersList = document.querySelector( "#question-" + idx + " ul" ).querySelectorAll( "li > input ");
       var answersList = questions[ idx ].querySelectorAll( "ul li > input ");
       for ( answersIdx = 0; answersIdx < answersList.length; answersIdx++ ) {
         if ( !popcornOptions.questions[ idx ].answers ) {
           popcornOptions.questions[ idx ].answers = [];
         }
-        // popcornOptions.questions[ idx ].answers[ answersIdx ] = document.getElementById( "answer-" + idx + "-" + answersIdx ).value;
         popcornOptions.questions[ idx ].answers[ answersIdx ] = answersList[ answersIdx ].value;
       }
     }
@@ -111,28 +129,13 @@ document.addEventListener( "DOMContentLoaded", function() {
     }
     popcornOptions.paginate = elements.paginate.checked;
 
-    _comm.send( "submit", {
-      eventData: popcornOptions,
-      alsoClose: alsoClose
-    });
-  }
-
-  function okPressed( e ) {
-    // update( true );
-  }
-
-  function cancelPressed( e ) {
-    _comm.send( "cancel" );
-  }
-
-  document.addEventListener( "keydown", function( e ) {
-    if ( e.keyCode === 13 ) {
-      okPressed( e );
+    try {
+      _trackEvent.update( popcornOptions );
     }
-    else if ( e.keyCode === 27 ) {
-      cancelPressed( e );
+    catch( e ) {
+      setErrorState( e.toString() );
     }
-  }, false);
+  }
 
   function addAnswer( aAddButton, aUl, aLi, aIdx, answersIdx ) {
     return function( e ) {
@@ -146,7 +149,6 @@ document.addEventListener( "DOMContentLoaded", function() {
       id = "answer-" + aIdx + "-" + len;
 
       aLi = document.createElement( "li" );
-      // id = "answer-" + aIdx + "-" + answersIdx;
       input = document.createElement( "input" );
       input.setAttribute( "type", "text" );
       input.id = id;
@@ -156,7 +158,6 @@ document.addEventListener( "DOMContentLoaded", function() {
 
       removeButton.addEventListener( "click", removeAnswer( removeButton, aUl, aLi, aIdx, answersIdx + 1 ), false );
 
-      // aLi.appendChild( answerLabel );
       aLi.appendChild( input );
       aUl.appendChild( aLi );
       aLi.appendChild( removeButton );
@@ -177,11 +178,8 @@ document.addEventListener( "DOMContentLoaded", function() {
           addButton.innerHTML = "+";
           addButton.addEventListener( "click", addAnswer( addButton, aUl, aUl.lastChild, aIdx, aAnswersIdx ), false );
           id = "answer-" + aIdx + "-" + aAnswersIdx;
-          // previousLabel = aUl.lastChild.querySelectorAll( "label" )[ 0 ];
           previousInput = aUl.lastChild.querySelectorAll( "input" )[ 0 ];
           previousInput.setAttribute( "id", id );
-          // previousLabel.setAttribute( "for", id );
-          // previousLabel.innerHTML = aAnswersIdx + 1;
           aUl.lastChild.appendChild( addButton );
         }
         else {
@@ -190,11 +188,8 @@ document.addEventListener( "DOMContentLoaded", function() {
           while ( ( currentLi = currentLi.nextSibling ) ) {
             id = "answer-" + aIdx + "-" + count;
             count += 1;
-            // currentLabel = currentLi.querySelectorAll( "label" )[ 0 ];
             currentInput = currentLi.querySelectorAll( "input" )[ 0 ];
             currentInput.setAttribute( "id", id );
-            // currentLabel.setAttribute( "for", id );
-            // currentLabel.innerHTML = count;
           }
           aUl.removeChild( aLi );
         }
@@ -212,20 +207,23 @@ document.addEventListener( "DOMContentLoaded", function() {
     };
   }
 
-  _comm.listen( "trackeventdata", function( e ) {
+  function onEditorOpen( e ) {
     function createQuestionsRow() {
       var question, answersDiv, questionContainer, theQuestion, answerLabel, id, input, ul, li, addButton, removeButton, idx, answersIdx, removeQuestionButton;
 
-      questions.setAttribute( "class", "question-container" );
+      // questions.setAttribute( "class", "question-container" );
 
       for ( idx = 0; idx < popcornOptions.questions.length; idx++) {
         questionContainer = document.createElement( "div" );
+        questionContainer.setAttribute( "style", "padding-top: 20px; padding-bottom: 20px" );
         questionContainer.id = "question-" + idx;
         answersDiv = document.createElement( "div" );
         theQuestion = popcornOptions.questions[ idx ];
         question = document.createElement( "textarea" );
         question.innerHTML = theQuestion.question;
         ul = document.createElement( "ul" );
+        ul.setAttribute( "style", "list-style-type: none; display: inline; padding: 0" );
+        question.setAttribute( "style", "width: 150px" );
         for ( answersIdx = 0; answersIdx < theQuestion.answers.length; answersIdx++ ) {
           li = document.createElement( "li" );
           input = document.createElement( "input" );
@@ -236,7 +234,6 @@ document.addEventListener( "DOMContentLoaded", function() {
           answerLabel = document.createElement( "label" );
           answerLabel.setAttribute( "for", id );
           answerLabel.innerHTML = answersIdx + 1;
-          // li.appendChild( answerLabel );
           li.appendChild( input );
           removeButton = document.createElement( "button" );
           removeButton.innerHTML = "-";
@@ -255,7 +252,6 @@ document.addEventListener( "DOMContentLoaded", function() {
         removeQuestionButton.innerHTML = "-";
         removeQuestionButton.addEventListener( "click", removeQuestion( removeButton, elements.questions, questionContainer ), false );
 
-        // questionContainer.appendChild( document.createTextNode( "Question " + ( idx + 1 ) ) );
         questionContainer.appendChild( question );
         questionContainer.appendChild( removeQuestionButton );
         questionContainer.appendChild( ul );
@@ -276,22 +272,18 @@ document.addEventListener( "DOMContentLoaded", function() {
       answersIdx = answersIdx - 1;
     }
 
-    popcornOptions = e.data.popcornOptions;
-
     createQuestionsRow();
 
-    var targets = e.data.targets,
-        idx, input, answers, questionsIdx, answersDropdown;
+    var select = _targets.querySelector( "select" ),
+        targets;
+    select.removeChild( select.querySelector( ".default-target-option" ) );
+    targets = _targets.querySelector( "select" ).children;
 
-    for ( idx = 0; idx < targets.length; idx++ ) {
-      input = document.createElement( "option" );
-      input.appendChild( document.createTextNode( targets[ idx ] ) );
-      input.value = targets[ idx ];
-      elements.target.appendChild( input );
-      if ( popcornOptions.target === targets[ idx ] ) {
-        elements.target.selectedIndex = idx;
-      }
+    while ( targets[ 0 ] ) {
+      elements.target.appendChild( targets[ 0 ] );
     }
+
+    elements.target.value = _trackEvent.popcornOptions.target;
 
     for ( questionsIdx = 0; questionsIdx < popcornOptions.questions.length; questionsIdx++ ) {
       answers = popcornOptions.questions[ questionsIdx ] && popcornOptions.questions[ questionsIdx ].answers || [];
@@ -299,7 +291,7 @@ document.addEventListener( "DOMContentLoaded", function() {
         input = document.createElement( "option" );
         input.appendChild( document.createTextNode( answers[ idx ] ) );
         input.value = answers[ idx ];
-        answersDropdown = document.getElementById( "correct-" + questionsIdx );
+        answersDropdown = _rootElement.querySelector( "#correct-" + questionsIdx );
         answersDropdown.appendChild( input );
         answersDropdown.addEventListener( "change", function( e ) {
           update( false );
@@ -313,18 +305,15 @@ document.addEventListener( "DOMContentLoaded", function() {
     elements.start.value = popcornOptions.start;
     elements.end.value = popcornOptions.end;
     elements.paginate.checked = !!popcornOptions.paginate;
-    elements.results.checked = !!popcornOptions.decorators;
+    elements.results.checked = popcornOptions.decorators && popcornOptions.decorators.length > 0 || false;
+  }
 
-    update( false );
-  });
-
-  _comm.listen( "trackeventupdated", function( e ) {
-    var questions = document.getElementById( "questions" ).children,
+  function onTrackEventUpdated( e ) {
+    var questions = _rootElement.querySelector( "#questions" ).children,
         idx, questionsIdx, answersDropdown, answers;
 
     for ( questionsIdx = 0; questionsIdx < popcornOptions.questions.length; questionsIdx++ ) {
       answers = popcornOptions.questions[ questionsIdx ] && popcornOptions.questions[ questionsIdx ].answers || [];
-      // answersDropdown = document.getElementById( "correct-" + questionsIdx );
       answersDropdown = questions[ questionsIdx ].querySelectorAll( "select" )[ 0 ];
 
       while ( answersDropdown.hasChildNodes() ) {
@@ -336,21 +325,24 @@ document.addEventListener( "DOMContentLoaded", function() {
         input.appendChild( document.createTextNode( answers[ idx ] ) );
         input.value = answers[ idx ];
         answersDropdown.appendChild( input );
-        if ( popcornOptions.questions[ 0 ].correctAnswer === idx ) {
+        if ( popcornOptions.questions[ questionsIdx ].correctAnswer === idx ) {
           answersDropdown.selectedIndex = idx;
         }
       }
     }
-  });
+  }
 
-  _comm.listen( "trackeventupdatefailed", function( e ) {
-    if( e.data === "invalidtime" ){
-      document.getElementById( "message" ).innerHTML = "You've entered an invalid start or end time. Please verify that they are both greater than 0, the end time is equal to or less than the media's duration, and that the start time is less than the end time.";
-      elements.start.className = elements.end.className = "error";
-    } //if
+  Butter.Editor.TrackEventEditor( _this, butter, rootElement, {
+    open: function( parentElement, trackEvent ) {
+      _targets = _this.createTargetsList( [ butter.currentMedia ].concat( butter.targets ) );
+      popcornOptions = trackEvent.popcornOptions;
+      _trackEvent = trackEvent;
+      onEditorOpen();
+      _trackEvent.listen( "trackeventupdated", onTrackEventUpdated );
+    },
+    close: function() {
+      _trackEvent.unlisten( "trackeventupdated", onTrackEventUpdated );
+    }
   });
-
-  _comm.listen( "close", function( e ){
-    update( false );
   });
-}, false );
+}( window.Butter ));

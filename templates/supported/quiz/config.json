@@ -5,8 +5,7 @@
   "baseDir": "../../../",
   "savedDataUrl": "saved-data.json",
   "editor": {
-    "quiz": "{{baseDir}}templates/supported/quiz/editors/quiz-editor.html",
-    "default": "{{baseDir}}editors/default-editor.html"
+    "quiz": "{{baseDir}}templates/supported/quiz/editors/quiz-editor.js"
   },
   "plugin": {
     "plugins": [
