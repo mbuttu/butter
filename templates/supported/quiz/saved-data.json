@@ -65,6 +65,7 @@
               "popcornOptions": {
                 "start": 1,
                 "end": 2,
+                "text": "test",
                 "target": "Area2"
               },
               "track": "Track2",
