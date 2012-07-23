@@ -6,40 +6,36 @@
   <h1>Quiz Editor</h1>
   <div class="error-message"></div>
   <div class="editor-options">
-    <table>
-      <tr>
-        <td>Start</td>
-        <td><input id="start" type="text"/></td>
-      </tr>
-      <tr>
-        <td>End</td>
-        <td><input id="end" type="text"/></td>
-      </tr>
-      <tr>
-        <td>Target</td>
-        <td><select id="target" data-manifest-key="target"></select>
-      </tr>
-      <tr>
-        <td>Paginate</td>
-        <td><input id="paginate" type="checkbox" /><td>
-      </tr>
-      <tr>
-        <td>Show Results</td>
-        <td><input id="results" type="checkbox" /><td>
-      </tr>
-      <tr>
-        <td colspan="2">Questions <button id="addQuestion">+</button></td>
-      </tr>
-      <tr>
-        <td colspan="2">
-          <div id="questions"></div>
-        </td>
-      </tr>
-    </table>
+    <div class="trackevent-property default input">
+      <div class="property-name">Start</div>
+      <input id="start" type="text"/>
+    </div>
 
-    <table>
-      <tbody id="answers"></tbody>
-    </table>
+    <div class="trackevent-property default input">
+      <div class="property-name">End</div>
+      <input id="end" type="text"/>
+    </div>
+
+    <div class="trackevent-property targets">
+      <div class="property-name">Target</div>
+      <select id="target" data-manifest-key="target"></select>
+    </div>
+
+    <div class="trackevent-property default input">
+      <div class="property-name">Paginate</div>
+      <input id="paginate" type="checkbox"/>
+    </div>
+
+    <div class="trackevent-property default input">
+      <div class="property-name">Show Results</div>
+      <input id="results" type="checkbox"/>
+    </div>
+
+    <div class="trackevent-property default">
+      <div class="property-name" style="display: inline">Questions</div>
+      <button id="addQuestion">+</button>
+      <div id="questions"></div>
+    </div>
   </div>
 </div>
 
