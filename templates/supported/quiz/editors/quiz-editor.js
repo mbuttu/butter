@@ -95,8 +95,8 @@
       addButton.innerHTML = "+";
       removeQuestionButton.innerHTML = "-";
       removeAnswerButton.innerHTML = "-";
-      addButton.addEventListener( "click", addAnswer( addButton, ul, li, _popcornOptions.questions.length, 0 ) );
-      removeAnswerButton.addEventListener( "click", removeAnswer( removeAnswerButton, ul, li, _popcornOptions.questions.length + 1, 0 ) );
+      addButton.addEventListener( "click", addAnswer( addButton, ul, li ) );
+      removeAnswerButton.addEventListener( "click", removeAnswer( ul, li ) );
       removeQuestionButton.addEventListener( "click", removeQuestion( removeQuestionButton, _elements.questions, questionDiv ), false );
 
       textarea.innerHTML = "Question";
@@ -121,51 +121,49 @@
       updateTrackEvent();
     }
 
-    function addAnswer( aAddButton, aUl, aLi, aIdx, answersIdx ){
+    function addAnswer( addButton, ul, li ){
       return function( e ){
         var removeButton = document.createElement( "button" ),
-            len = aUl.children.length;
+            len = ul.children.length;
 
         removeButton.innerHTML = "-";
-        aLi.removeChild( aLi.lastChild );
+        li.removeChild( li.lastChild );
 
-        aLi = document.createElement( "li" );
+        li = document.createElement( "li" );
         input = document.createElement( "input" );
         input.setAttribute( "type", "text" );
         input.setAttribute( "style", "float: none; width: 100px" );
 
-        removeButton.addEventListener( "click", removeAnswer( removeButton, aUl, aLi, aIdx, answersIdx + 1 ), false );
+        removeButton.addEventListener( "click", removeAnswer( ul, li ), false );
 
-        aLi.appendChild( input );
-        aUl.appendChild( aLi );
-        aLi.appendChild( removeButton );
-        aLi.appendChild( aAddButton );
+        li.appendChild( input );
+        ul.appendChild( li );
+        li.appendChild( removeButton );
+        li.appendChild( addButton );
 
         updateTrackEvent();
       };
     }
 
-    function removeAnswer( aAddButton, aUl, aLi, aIdx, aAnswersIdx ){
+    function removeAnswer( ul, li ){
       return function( e ){
-        var addButton, previousInput, previousLabel, previousLi, currentLi, currentLabel, currentInput, count;
+        var addButton, previousInput, currentLi, currentInput;
 
-        if ( aUl.lastChild !== aUl.firstChild ){
-          if ( aUl.lastChild === aLi ){
-            aUl.removeChild( aLi );
+        if ( ul.lastChild !== ul.firstChild ){
+          if ( ul.lastChild === li ){
+            ul.removeChild( li );
             addButton = document.createElement( "button" );
             addButton.innerHTML = "+";
-            addButton.addEventListener( "click", addAnswer( addButton, aUl, aUl.lastChild, aIdx, aAnswersIdx ), false );
-            previousInput = aUl.lastChild.querySelector( "input" );
-            aUl.lastChild.appendChild( addButton );
+            addButton.addEventListener( "click", addAnswer( addButton, ul, ul.lastChild ), false );
+            previousInput = ul.lastChild.querySelector( "input" );
+            ul.lastChild.appendChild( addButton );
           }
           else{
-            currentLi = aLi;
-            count = aAnswersIdx;
+            currentLi = li;
             while ( ( currentLi = currentLi.nextSibling ) ){
-              count += 1;
               currentInput = currentLi.querySelector( "input" );
             }
-            aUl.removeChild( aLi );
+            ul.removeChild( li );
           }
           updateTrackEvent();
         }
@@ -206,12 +204,12 @@
             li.appendChild( input );
             removeButton = document.createElement( "button" );
             removeButton.innerHTML = "-";
-            removeButton.addEventListener( "click", removeAnswer( removeButton, ul, li, idx, answersIdx + 1 ), false );
+            removeButton.addEventListener( "click", removeAnswer( ul, li ), false );
             li.appendChild( removeButton );
             if ( answersIdx === theQuestion.answers.length - 1 ){
               addButton = document.createElement( "button" );
               addButton.innerHTML = "+";
-              addButton.addEventListener( "click", addAnswer( addButton, ul, li, idx, answersIdx ), false );
+              addButton.addEventListener( "click", addAnswer( addButton, ul, li ), false );
               li.appendChild( addButton );
             }
             ul.appendChild( li );
@@ -236,8 +234,6 @@
 
           _elements.questions.appendChild( questionContainer );
         }
-        idx = idx - 1;
-        answersIdx = answersIdx - 1;
       }
 
       createQuestionsRow();
