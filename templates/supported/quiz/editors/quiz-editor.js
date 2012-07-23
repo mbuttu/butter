@@ -11,16 +11,6 @@
       _elements = {},
       _popcornOptions = {};
 
-  _rootElement.querySelector( "#addQuestion" ).addEventListener( "click", addQuestion, false );
-
-  for ( var idx = 0; idx < _fields.length; idx++ ){
-    var name = _fields[ idx ];
-    _elements[ name ] = _rootElement.querySelector( "#" + name );
-    _elements[ name ].addEventListener( "change", function( e ){
-      update();
-    }, false);
-  }
-
   function setErrorState( message ){
     if ( message ){
       _messageContainer.innerHTML = message;
@@ -34,9 +24,9 @@
     }
   }
 
-  function update(){
+  function updateTrackEvent(){
     var questions = _rootElement.querySelector( "#questions" ).children,
-        idx, answersIdx;
+        idx;
 
     setErrorState( false );
 
@@ -54,11 +44,11 @@
       if ( !_popcornOptions.questions[ idx ] ){
         _popcornOptions.questions[ idx ] = {};
       }
-      _popcornOptions.questions[ idx ].question = questions[ idx ].querySelectorAll( "textarea" )[ 0 ].value;
-      possibleAnswers = questions[ idx ].querySelectorAll( "select" )[ 0 ];
+      _popcornOptions.questions[ idx ].question = questions[ idx ].querySelector( "textarea" ).value;
+      possibleAnswers = questions[ idx ].querySelector( "select" );
       _popcornOptions.questions[ idx ].correctAnswer = possibleAnswers.selectedIndex;
       var answersList = questions[ idx ].querySelectorAll( "ul li > input ");
-      for ( answersIdx = 0; answersIdx < answersList.length; answersIdx++ ){
+      for ( var answersIdx = 0; answersIdx < answersList.length; answersIdx++ ){
         if ( !_popcornOptions.questions[ idx ].answers ){
           _popcornOptions.questions[ idx ].answers = [];
         }
@@ -93,6 +83,7 @@
         input = document.createElement( "input" ),
         select = document.createElement( "select" ),
         addButton = document.createElement( "button" ),
+        labelDiv = document.createElement( "div" ),
         removeQuestionButton = document.createElement( "button" ),
         removeAnswerButton = document.createElement( "button" );
 
@@ -100,6 +91,7 @@
     textarea.setAttribute( "style", "width: 130px" );
     questionDiv.setAttribute( "style", "padding-top: 20px; padding-bottom: 20px" );
     input.setAttribute( "style", "float: none; width: 100px" );
+
     addButton.innerHTML = "+";
     removeQuestionButton.innerHTML = "-";
     removeAnswerButton.innerHTML = "-";
@@ -113,7 +105,6 @@
     li.appendChild( removeAnswerButton );
     li.appendChild( addButton );
 
-    var labelDiv = document.createElement( "div" );
     labelDiv.setAttribute( "class", "trackevent-property default input" );
     labelDiv.innerHTML = "Correct Answer";
 
@@ -127,7 +118,7 @@
     questionDiv.appendChild( select );
 
     _rootElement.querySelector( "#questions" ).appendChild( questionDiv );
-    update();
+    updateTrackEvent();
   }
 
   function addAnswer( aAddButton, aUl, aLi, aIdx, answersIdx ){
@@ -150,7 +141,7 @@
       aLi.appendChild( removeButton );
       aLi.appendChild( aAddButton );
 
-      update();
+      updateTrackEvent();
     };
   }
 
@@ -164,7 +155,7 @@
           addButton = document.createElement( "button" );
           addButton.innerHTML = "+";
           addButton.addEventListener( "click", addAnswer( addButton, aUl, aUl.lastChild, aIdx, aAnswersIdx ), false );
-          previousInput = aUl.lastChild.querySelectorAll( "input" )[ 0 ];
+          previousInput = aUl.lastChild.querySelector( "input" );
           aUl.lastChild.appendChild( addButton );
         }
         else{
@@ -172,11 +163,11 @@
           count = aAnswersIdx;
           while ( ( currentLi = currentLi.nextSibling ) ){
             count += 1;
-            currentInput = currentLi.querySelectorAll( "input" )[ 0 ];
+            currentInput = currentLi.querySelector( "input" );
           }
           aUl.removeChild( aLi );
         }
-        update();
+        updateTrackEvent();
       }
     };
   }
@@ -185,7 +176,7 @@
     return function( e ){
       if ( container.firstChild !== container.lastChild ){
         container.removeChild( div );
-        update();
+        updateTrackEvent();
       }
     };
   }
@@ -262,39 +253,16 @@
 
     _elements.target.value = _trackEvent.popcornOptions.target;
 
-    for ( questionsIdx = 0; questionsIdx < _popcornOptions.questions.length; questionsIdx++ ){
-      var questions = _rootElement.querySelectorAll( "#questions > div" ),
-          answers = _popcornOptions.questions[ questionsIdx ] && _popcornOptions.questions[ questionsIdx ].answers || [],
-          answersDropdown;
-
-      for ( idx = 0; idx < answers.length; idx++ ){
-        input = document.createElement( "option" );
-        input.appendChild( document.createTextNode( answers[ idx ] ) );
-        input.value = answers[ idx ];
-        answersDropdown = questions[ questionsIdx ].querySelector( "select" );
-        answersDropdown.appendChild( input );
-        answersDropdown.addEventListener( "change", function( e ){
-          update();
-        }, false);
-        if ( _popcornOptions.questions[ questionsIdx ].correctAnswer === idx ){
-          answersDropdown.selectedIndex = idx;
-        }
-      }
-    }
-
-    _elements.start.value = _popcornOptions.start;
-    _elements.end.value = _popcornOptions.end;
-    _elements.paginate.checked = !!_popcornOptions.paginate;
-    _elements.results.checked = _popcornOptions.decorators && _popcornOptions.decorators.length > 0 || false;
+    refreshUI();
   }
 
-  function onTrackEventUpdated( e ){
+  function populateDropdowns() {
     var questions = _rootElement.querySelector( "#questions" ).children,
-        idx, questionsIdx, answersDropdown, answers;
+        idx, answersDropdown, answers;
 
-    for ( questionsIdx = 0; questionsIdx < _popcornOptions.questions.length; questionsIdx++ ){
+    for ( var questionsIdx = 0; questionsIdx < _popcornOptions.questions.length; questionsIdx++ ){
       answers = _popcornOptions.questions[ questionsIdx ] && _popcornOptions.questions[ questionsIdx ].answers || [];
-      answersDropdown = questions[ questionsIdx ].querySelectorAll( "select" )[ 0 ];
+      answersDropdown = questions[ questionsIdx ].querySelector( "select" );
 
       while ( answersDropdown.hasChildNodes() ){
         answersDropdown.removeChild( answersDropdown.lastChild );
@@ -305,6 +273,9 @@
         input.appendChild( document.createTextNode( answers[ idx ] ) );
         input.value = answers[ idx ];
         answersDropdown.appendChild( input );
+        answersDropdown.addEventListener( "change", function( e ){
+          updateTrackEvent();
+        }, false);
         if ( _popcornOptions.questions[ questionsIdx ].correctAnswer === idx ){
           answersDropdown.selectedIndex = idx;
         }
@@ -312,8 +283,31 @@
     }
   }
 
+  function refreshUI() {
+    populateDropdowns();
+    _elements.start.value = _popcornOptions.start;
+    _elements.end.value = _popcornOptions.end;
+    _elements.paginate.checked = !!_popcornOptions.paginate;
+    _elements.results.checked = _popcornOptions.decorators && _popcornOptions.decorators.length > 0 || false;
+  }
+
+  function onTrackEventUpdated( e ){
+    refreshUI();
+  }
+
   Butter.Editor.TrackEventEditor( _this, butter, rootElement,{
     open: function( parentElement, trackEvent ){
+
+      _rootElement.querySelector( "#addQuestion" ).addEventListener( "click", addQuestion, false );
+
+      for ( var idx = 0; idx < _fields.length; idx++ ){
+        var name = _fields[ idx ];
+        _elements[ name ] = _rootElement.querySelector( "#" + name );
+        _elements[ name ].addEventListener( "change", function( e ){
+          updateTrackEvent();
+        }, false);
+      }
+
       _targets = _this.createTargetsList( [ butter.currentMedia ].concat( butter.targets ) );
       _popcornOptions = trackEvent.popcornOptions;
       _trackEvent = trackEvent;
