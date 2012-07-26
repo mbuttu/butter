@@ -201,7 +201,7 @@
             theQuestion = questions[ questionIdx ];
             correctAnswer = theQuestion.correctAnswer;
             selectedAnswer = selectedAnswers[ questionIdx ];
-            document.getElementById( "answer-" + quizNumber + "-" + questionIdx + "-" + correctAnswer ).parentNode.setAttribute( "class", "" );
+            // document.getElementById( "answer-" + quizNumber + "-" + questionIdx + "-" + correctAnswer ).parentNode.setAttribute( "class", "" );
             // what if nothing is selected?
             if ( !theQuestion.isCorrect ) {
               if ( !paginated ) {

@@ -46,7 +46,7 @@
         }
         _popcornOptions.questions[ idx ].question = questions[ idx ].querySelector( "textarea" ).value;
         possibleAnswers = questions[ idx ].querySelector( "select" );
-        _popcornOptions.questions[ idx ].correctAnswer = possibleAnswers.selectedIndex;
+        _popcornOptions.questions[ idx ].correctAnswer = possibleAnswers.selectedIndex - 1;
         var answersList = questions[ idx ].querySelectorAll( "ul li > input ");
         for ( var answersIdx = 0; answersIdx < answersList.length; answersIdx++ ){
           if ( !_popcornOptions.questions[ idx ].answers ){
@@ -264,6 +264,14 @@
           answersDropdown.removeChild( answersDropdown.lastChild );
         }
 
+        input = document.createElement( "option" );
+        input.appendChild( document.createTextNode( "(No answer)" ) );
+        input.value = "(No answer)";
+        answersDropdown.appendChild( input );
+        answersDropdown.addEventListener( "change", function( e ){
+          updateTrackEvent();
+        }, false);
+
         for ( idx = 0; idx < answers.length; idx++ ){
           input = document.createElement( "option" );
           input.appendChild( document.createTextNode( answers[ idx ] ) );
@@ -273,7 +281,7 @@
             updateTrackEvent();
           }, false);
           if ( _popcornOptions.questions[ questionsIdx ].correctAnswer === idx ){
-            answersDropdown.selectedIndex = idx;
+            answersDropdown.selectedIndex = idx + 1;
           }
         }
       }
