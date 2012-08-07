@@ -5,7 +5,8 @@
   "baseDir": "../../../",
   "savedDataUrl": "saved-data.json",
   "editor": {
-    "quiz": "{{baseDir}}templates/supported/quiz/editors/quiz-editor.js"
+    "quiz": "{{baseDir}}templates/supported/quiz/editors/quiz-editor.js",
+    "toc": "{{baseDir}}templates/supported/quiz/editors/toc-editor.js"
   },
   "plugin": {
     "plugins": [
@@ -14,12 +15,17 @@
         "path": "{{baseDir}}templates/supported/quiz/plugins/popcorn.quiz.js"
       },
       {
+        "type": "toc",
+        "path": "{{baseDir}}templates/supported/quiz/plugins/popcorn.toc.js"
+      },
+      {
         "type": "text",
         "path": "{{baseDir}}external/popcorn-js/plugins/text/popcorn.text.js"
       }
     ],
     "defaults" : [
       "quiz",
+      "toc",
       "text"
     ]
   }
