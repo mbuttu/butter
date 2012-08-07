@@ -53,14 +53,41 @@
         {
           "name": "Track1",
           "id": "Track1",
-          "trackEvents": []
+          "trackEvents": [
+            {
+              "id": "TrackEvent1",
+              "type": "toc",
+              "popcornOptions": {
+                "start": 0,
+                "end": 10,
+                "target": "Area2",
+                "sections": [
+                  {
+                    "time": "00:00",
+                    "title": "Intro",
+                    "description": "This is the introduction."
+                  },
+                  {
+                    "time": "00:05",
+                    "title": "Section 2",
+                    "description": "This is the second section."
+                  },
+                  {
+                    "time": "00:10",
+                    "title": "Section 3",
+                    "description": "This is the third section"
+                  }
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "Track2",
           "id": "Track2",
           "trackEvents": [
             {
-              "id": "TrackEvent1",
+              "id": "TrackEvent2",
               "type": "text",
               "popcornOptions": {
                 "start": 1,
