@@ -1,6 +1,6 @@
 (function( Butter ){
 
-  Butter.Editor.register( "quiz", "load!{{baseDir}}/templates/supported/quiz/editors/quiz-editor.html", function( rootElement, butter ) {
+  Butter.Editor.register( "quiz", "load!{{baseDir}}/templates/supported/fivel/editors/quiz-editor.html", function( rootElement, butter ) {
 
     var _this = this,
         _rootElement = rootElement,

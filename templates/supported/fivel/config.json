@@ -1,22 +1,22 @@
 {
-  "name": "quiz",
-  "title": "Quiz",
+  "name": "fivel",
+  "title": "Popcorn Maker",
   "template": "index.html",
   "baseDir": "../../../",
   "savedDataUrl": "saved-data.json",
   "editor": {
-    "quiz": "{{baseDir}}templates/supported/quiz/editors/quiz-editor.js",
-    "toc": "{{baseDir}}templates/supported/quiz/editors/toc-editor.js"
+    "quiz": "{{baseDir}}templates/supported/fivel/editors/quiz-editor.js",
+    "toc": "{{baseDir}}templates/supported/fivel/editors/toc-editor.js"
   },
   "plugin": {
     "plugins": [
       {
         "type": "quiz",
-        "path": "{{baseDir}}templates/supported/quiz/plugins/popcorn.quiz.js"
+        "path": "{{baseDir}}templates/supported/fivel/plugins/popcorn.quiz.js"
       },
       {
         "type": "toc",
-        "path": "{{baseDir}}templates/supported/quiz/plugins/popcorn.toc.js"
+        "path": "{{baseDir}}templates/supported/fivel/plugins/popcorn.toc.js"
       },
       {
         "type": "text",
