@@ -268,18 +268,13 @@
         input.appendChild( document.createTextNode( "(No answer)" ) );
         input.value = "(No answer)";
         answersDropdown.appendChild( input );
-        answersDropdown.addEventListener( "change", function( e ){
-          updateTrackEvent();
-        }, false);
 
         for ( idx = 0; idx < answers.length; idx++ ){
           input = document.createElement( "option" );
           input.appendChild( document.createTextNode( answers[ idx ] ) );
           input.value = answers[ idx ];
           answersDropdown.appendChild( input );
-          answersDropdown.addEventListener( "change", function( e ){
-            updateTrackEvent();
-          }, false);
+
           if ( _popcornOptions.questions[ questionsIdx ].correctAnswer === idx ){
             answersDropdown.selectedIndex = idx + 1;
           }
@@ -304,12 +299,16 @@
 
         _rootElement.querySelector( "#addQuestion" ).addEventListener( "click", addQuestion, false );
 
+        function onElementChanged(){
+          return function( e ){
+            updateTrackEvent();
+          };
+        }
+
         for ( var idx = 0; idx < _fields.length; idx++ ){
           var name = _fields[ idx ];
           _elements[ name ] = _rootElement.querySelector( "#" + name );
-          _elements[ name ].addEventListener( "change", function( e ){
-            updateTrackEvent();
-          }, false);
+          _elements[ name ].addEventListener( "change", onElementChanged(), false );
         }
 
         _targets = _this.createTargetsList( [ butter.currentMedia ].concat( butter.targets ) );
