@@ -217,8 +217,16 @@
 
     Butter.Editor.TrackEventEditor( _this, butter, rootElement,{
       open: function( parentElement, trackEvent ){
+        function snapTrackEvent( e ){
+          _elements.start.value = 0;
+          // FIXME: the - 0.005 should be removed once this bug is fixed
+          // https://webmademovies.lighthouseapp.com/projects/65733-popcorn-maker/tickets/1976-setting-the-end-time-of-a-track-event-to-butterduration-sometimes-fails
+          _elements.end.value = butter.duration - 0.005;
+          updateTrackEvent();
+        }
 
         _rootElement.querySelector( "#addSection" ).addEventListener( "click", addSection, false );
+        _rootElement.querySelector( "#snap" ).addEventListener( "click", snapTrackEvent, false );
 
         for ( var idx = 0; idx < _fields.length; idx++ ){
           var name = _fields[ idx ];
