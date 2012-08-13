@@ -141,6 +141,14 @@
       };
 
       this.end = function( target ) {
+        var resumeButton = addButton( "resumeButton", "Resume", function() {
+          options._container.style.display = "none";
+          popcorn.play();
+        }),
+        resumeText = document.createElement( "p" );
+
+        resumeText.innerHTML = "Quiz is complete!";
+
         function checkAnswers() {
           var theQuestion, correctAnswer, selectedAnswer, score;
 
@@ -170,8 +178,10 @@
           hideAll();
         }
 
-        popcorn.play();
         decoratable( "end", target );
+
+        target.appendChild( resumeText );
+        target.appendChild( resumeButton );
       };
     }
 
@@ -246,6 +256,21 @@
       }
     }
 
+    function addButton( buttonName, buttonText, clickCallback ) {
+      var button = buttons[ buttonName ];
+
+      if ( !button ) {
+        button = document.createElement( "button" );
+        button.appendChild( document.createTextNode( buttonText ) );
+        button.addEventListener( "click", function() {
+          clickCallback();
+        }, false );
+        buttons[ buttonName ] = button;
+        options._container.appendChild( button );
+      }
+      return button;
+    }
+
     // end = end || start + 0.5,
     // UL > LI elements?
     var popcorn = this,
@@ -297,27 +322,12 @@
         target && target.appendChild( options._container );
       },
       start: function( event, options ) {
-        function addButton( buttonText, clickCallback ) {
-          var button = buttons[ buttonText ];
-
-          if ( !button ) {
-            button = document.createElement( "button" );
-            button.appendChild( document.createTextNode( buttonText ) );
-            button.addEventListener( "click", function() {
-              clickCallback();
-            }, false );
-            buttons[ buttonText ] = button;
-            options._container.appendChild( button );
-          }
-          return button;
-        }
-
         function toggleButtons() {
-          var previousButton = addButton( previousButtonText, function() {
+          var previousButton = addButton( "previousButton", previousButtonText, function() {
                 quiz.previous();
                 previousButton.style.display = quiz.hasPrevious() ? "inline" : "none";
               }),
-              continueButton = addButton( continueButtonText, function() {
+              continueButton = addButton( "continueButton", continueButtonText, function() {
                 if ( quiz.hasNext() ) {
                   quiz.next();
                   previousButton.style.display = "inline";
