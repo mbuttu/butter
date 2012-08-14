@@ -182,6 +182,8 @@
 
         target.appendChild( resumeText );
         target.appendChild( resumeButton );
+
+        quizComplete = true;
       };
     }
 
@@ -285,6 +287,7 @@
         correctAnswers = 0,
         quizNumber = QUIZ_NUMBER++,
         questionable = 0,
+        quizComplete = false,
         paginated;
 
     for ( var idx = 0; idx < questions.length; idx++ ) {
@@ -345,11 +348,13 @@
 
         if ( allowPause ) {
           popcorn.pause();
-          toggleButtons();
         }
 
         options._container.style.display = "inline";
-        quiz.start();
+        if ( !quizComplete ) {
+          quiz.start();
+          toggleButtons();
+        }
       },
       end: function( event, options ) {
         options._container.style.display = "none";
