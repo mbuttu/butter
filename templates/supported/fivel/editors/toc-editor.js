@@ -1,6 +1,6 @@
 (function( Butter ){
 
-  Butter.Editor.register( "toc", "load!{{baseDir}}/templates/supported/fivel/editors/toc-editor.html", function( rootElement, butter ) {
+  Butter.Editor.register( "toc", "load!{{baseDir}}/templates/supported/fivel/editors/toc-editor.html", function( rootElement, butter, compiledLayout ) {
 
     var _this = this,
         _rootElement = rootElement,
@@ -84,10 +84,6 @@
       inputTime.classList.add( "section-time" );
       inputDescription.classList.add( "section-description" );
 
-      ul.setAttribute( "style", "list-style-type: none; display: inline; padding: 0" );
-      inputDescription.setAttribute( "style", "float: right; width: 130px" );
-      divDescription.setAttribute( "style", "padding-top: 20px; padding-bottom: 20px" );
-
       removeButton.innerHTML = "-";
       removeButton.addEventListener( "click", removeSection( removeButton, _elements.sections, divDescription ), false );
 
@@ -148,9 +144,6 @@
         removeButton.innerHTML = "-";
         removeButton.addEventListener( "click", removeSection( removeButton, _elements.sections, container ), false );
 
-        ul.setAttribute( "style", "list-style-type: none; display: inline; padding: 0" );
-        container.setAttribute( "style", "padding-top: 20px; padding-bottom: 20px" );
-
         label.innerHTML = "Title";
         label.setAttribute( "class", labelStyle );
         input.value = section.title;
@@ -182,7 +175,6 @@
         label.setAttribute( "class", labelStyle );
         input.innerHTML = section.description;
         input.setAttribute( "class", "section-description" );
-        input.setAttribute( "style", "float: right; width: 130px" );
 
         li.appendChild( label );
         li.appendChild( input );
@@ -241,6 +233,7 @@
         _trackEvent = trackEvent;
         onEditorOpen();
         _trackEvent.listen( "trackeventupdated", onTrackEventUpdated );
+        _this.applyExtraHeadTags( compiledLayout );
       },
       close: function(){
         _trackEvent.unlisten( "trackeventupdated", onTrackEventUpdated );
