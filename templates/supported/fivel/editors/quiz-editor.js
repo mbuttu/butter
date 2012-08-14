@@ -1,6 +1,6 @@
 (function( Butter ){
 
-  Butter.Editor.register( "quiz", "load!{{baseDir}}/templates/supported/fivel/editors/quiz-editor.html", function( rootElement, butter ) {
+  Butter.Editor.register( "quiz", "load!{{baseDir}}/templates/supported/fivel/editors/quiz-editor.html", function( rootElement, butter, compiledLayout ) {
 
     var _this = this,
         _rootElement = rootElement,
@@ -87,11 +87,6 @@
           removeQuestionButton = document.createElement( "button" ),
           removeAnswerButton = document.createElement( "button" );
 
-      ul.setAttribute( "style", "list-style-type: none; display: inline; padding: 0" );
-      textarea.setAttribute( "style", "width: 130px" );
-      questionDiv.setAttribute( "style", "padding-top: 20px; padding-bottom: 20px" );
-      input.setAttribute( "style", "float: none; width: 100px" );
-
       addButton.innerHTML = "+";
       removeQuestionButton.innerHTML = "-";
       removeAnswerButton.innerHTML = "-";
@@ -132,7 +127,6 @@
         li = document.createElement( "li" );
         input = document.createElement( "input" );
         input.setAttribute( "type", "text" );
-        input.setAttribute( "style", "float: none; width: 100px" );
 
         removeButton.addEventListener( "click", removeAnswer( ul, li ), false );
 
@@ -187,19 +181,15 @@
 
         for ( idx = 0; idx < _popcornOptions.questions.length; idx++){
           questionContainer = document.createElement( "div" );
-          questionContainer.setAttribute( "style", "padding-top: 20px; padding-bottom: 20px" );
           answersDiv = document.createElement( "div" );
           theQuestion = _popcornOptions.questions[ idx ];
           question = document.createElement( "textarea" );
           question.innerHTML = theQuestion.question;
           ul = document.createElement( "ul" );
-          ul.setAttribute( "style", "list-style-type: none; display: inline; padding: 0" );
-          question.setAttribute( "style", "width: 130px" );
           for ( answersIdx = 0; answersIdx < theQuestion.answers.length; answersIdx++ ){
             li = document.createElement( "li" );
             input = document.createElement( "input" );
             input.setAttribute( "type", "text" );
-            input.setAttribute( "style", "float: none; width: 100px" );
             input.value = theQuestion.answers[ answersIdx ];
             li.appendChild( input );
             removeButton = document.createElement( "button" );
@@ -316,6 +306,7 @@
         _trackEvent = trackEvent;
         onEditorOpen();
         _trackEvent.listen( "trackeventupdated", onTrackEventUpdated );
+        _this.applyExtraHeadTags( compiledLayout );
       },
       close: function(){
         _trackEvent.unlisten( "trackeventupdated", onTrackEventUpdated );
