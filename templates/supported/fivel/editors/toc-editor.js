@@ -127,9 +127,20 @@
     }
 
     function onEditorOpen( e ){
-      var sections = _popcornOptions.sections,
-          labelStyle = "trackevent-property default input",
-          container, ul, li, label, input, section, removeButton;
+      var labelStyle = "trackevent-property default input",
+          container, ul, li, label, input, section, removeButton, sections;
+
+      // Create on section by default with a start time of 00:00
+      if ( !_popcornOptions.sections ) {
+        _popcornOptions.sections = [];
+        _popcornOptions.sections.push({
+          title: "Intro",
+          time: "00:00",
+          description: "This is the introduction"
+        });
+      }
+
+      sections = _popcornOptions.sections;
 
       for ( var idx = 0; idx < sections.length; idx++ ){
         section = sections[ idx ];
