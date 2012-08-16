@@ -40,9 +40,14 @@
                 {
                   "question": "Question 2",
                   "answers": [ "1", "2" ],
-                  "correctAnswer": 0
+                  "correctAnswer": 0,
+                  "explanation": "This is definitely philosophical. That's why 2 is correct. Since 1 can't be 2 if the question is 2."
                 }],
-                "paginate": true,
+                "paginate": false,
+                "decorators": [{
+                  "when": "end",
+                  "what": "results"
+                }],
                 "target": "Area1"
               },
               "track": "Track0",

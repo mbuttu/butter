@@ -26,7 +26,7 @@
 
     function updateTrackEvent(){
       var questions = _rootElement.querySelector( "#questions" ).children,
-          idx;
+          possibleAnswers, explanation, idx;
 
       setErrorState( false );
 
@@ -46,7 +46,9 @@
         }
         _popcornOptions.questions[ idx ].question = questions[ idx ].querySelector( "textarea" ).value;
         possibleAnswers = questions[ idx ].querySelector( "select" );
+        explanation = questions[ idx ].querySelector( ".quiz-explanation" );
         _popcornOptions.questions[ idx ].correctAnswer = possibleAnswers.selectedIndex - 1;
+        _popcornOptions.questions[ idx ].explanation = explanation.value;
         var answersList = questions[ idx ].querySelectorAll( "ul li > input ");
         for ( var answersIdx = 0; answersIdx < answersList.length; answersIdx++ ){
           if ( !_popcornOptions.questions[ idx ].answers ){
@@ -82,6 +84,7 @@
           li = document.createElement( "li" ),
           input = document.createElement( "input" ),
           select = document.createElement( "select" ),
+          explanation = document.createElement( "textarea" ),
           addButton = document.createElement( "button" ),
           labelDiv = document.createElement( "div" ),
           removeQuestionButton = document.createElement( "button" ),
@@ -93,6 +96,8 @@
       addButton.addEventListener( "click", addAnswer( addButton, ul, li ) );
       removeAnswerButton.addEventListener( "click", removeAnswer( ul, li ) );
       removeQuestionButton.addEventListener( "click", removeQuestion( removeQuestionButton, _elements.questions, questionDiv ), false );
+
+      explanation.classList.add( "quiz-explanation" );
 
       textarea.innerHTML = "Question";
       input.value = "Answer";
@@ -109,8 +114,17 @@
       questionDiv.appendChild( removeQuestionButton );
 
       questionDiv.appendChild( ul );
+
       questionDiv.appendChild( labelDiv );
       questionDiv.appendChild( select );
+
+      labelDiv = document.createElement( "div" );
+
+      labelDiv.setAttribute( "class", "trackevent-property default input" );
+      labelDiv.innerHTML = "Explanation";
+
+      questionDiv.appendChild( labelDiv );
+      questionDiv.appendChild( explanation );
 
       _rootElement.querySelector( "#questions" ).appendChild( questionDiv );
       updateTrackEvent();
@@ -214,13 +228,25 @@
           questionContainer.appendChild( ul );
 
           var correct = document.createElement( "select" ),
+              explanation = document.createElement( "textarea" ),
               labelDiv = document.createElement( "div" );
+
+          explanation.classList.add( "quiz-explanation" );
+          explanation.innerHTML = theQuestion.explanation ? theQuestion.explanation : "";
 
           labelDiv.setAttribute( "class", "trackevent-property default input" );
           labelDiv.innerHTML = "Correct Answer";
 
           questionContainer.appendChild( labelDiv );
           questionContainer.appendChild( correct );
+
+          labelDiv = document.createElement( "div" );
+
+          labelDiv.setAttribute( "class", "trackevent-property default input" );
+          labelDiv.innerHTML = "Explanation";
+
+          questionContainer.appendChild( labelDiv );
+          questionContainer.appendChild( explanation );
 
           _elements.questions.appendChild( questionContainer );
         }
