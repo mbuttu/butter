@@ -3,11 +3,16 @@
     {
       "id": "Target0",
       "name": "Target0",
-      "element": "Area1"
+      "element": "video-container"
     },
     {
       "id": "Target1",
       "name": "Target1",
+      "element": "Area1"
+    },
+    {
+      "id": "Target2",
+      "name": "Target2",
       "element": "Area2"
     }
   ],

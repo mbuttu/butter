@@ -22,13 +22,12 @@
     }
     .container-div {
       float: left;
-      /* text-align: center; */
       font-family: helvetica;
       font-style: bold;
     }
     #main {
-      width: 300px;
-      height: 200px;
+      width: 500px;
+      height: 300px;
     }
     /* for FF11 specifically */
     #main video, #main audio {
@@ -55,16 +54,25 @@
       float: left;
       width: 500px;
     }
+
+    .quiz-question-container {
+      position: absolute;
+      top: 80px;
+      left: 200px;
+      color: white;
+    }
   </style>
 </head>
 <body>
-  <div id="main" data-butter="media" data-butter-media-controls="true"></div>
+  <div id="video-container" data-butter="target" data-buffer-default>
+    <div id="main" data-butter="media" data-butter-media-controls="true"></div>
+  </div>
   <div class="container-div">
     <div class="content-div" data-butter="target" id="Area1"></div>
     <p>Area 1</p>
   </div>
   <div class="container-div">
-    <div class="content-div" data-butter="target" id="Area2" data-butter-default></div>
+    <div class="content-div" data-butter="target" id="Area2"></div>
     <p>Area 2</p>
   </div>
   <div id="target-div"></div>

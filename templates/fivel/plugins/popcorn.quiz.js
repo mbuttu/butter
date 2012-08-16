@@ -328,6 +328,13 @@
         if ( !target && Popcorn.plugin.debug ) {
           throw new Error( "target container doesn't exist" );
         }
+
+        // FIXME: This is a work around until a bug is fixed in Popcorn Maker
+        // Bug is not filed yet, but it has to do with the default Ids in editor's being "Media Element" (not supposed to have spaces in Ids)
+        if ( target === popcorn.media.parentNode.parentNode ) {
+          options._container.classList.add( "quiz-question-container" );
+        }
+
         // if ( !options.question || !options.answers && Popcorn.plugin.debug ) {
         //   throw new Error( "a quiz needs a question and possible answers" );
         // }
