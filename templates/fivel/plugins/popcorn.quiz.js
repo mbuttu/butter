@@ -217,9 +217,18 @@
             // what if nothing is selected?
             if ( !theQuestion.isCorrect ) {
               if ( !paginated ) {
+                var p = document.createElement( "p" );
                 questionContainer = document.getElementById( "questionContainer-" + quizNumber + "-" + questionIdx );
                 document.getElementById( correctAnswerDivId ) && questionContainer.removeChild( document.getElementById( correctAnswerDivId ) );
-                correctAnswerDiv.appendChild( document.createTextNode( "Correct Answer: " + theQuestion.answers[ correctAnswer ] ) );
+                p.innerHTML = "Correct Answer: " + theQuestion.answers[ correctAnswer ];
+                correctAnswerDiv.appendChild( p );
+
+                if ( theQuestion.explanation ) {
+                  p = document.createElement( "p" );
+                  p.innerHTML = "Explanation: " + theQuestion.explanation;
+                  correctAnswerDiv.appendChild( p );
+                }
+
                 correctAnswerDiv.setAttribute( "id", correctAnswerDivId );
                 questionContainer.appendChild( correctAnswerDiv );
 
