@@ -21,12 +21,17 @@
       {
         "type": "text",
         "path": "{{baseDir}}external/popcorn-js/plugins/text/popcorn.text.js"
+      },
+      {
+        "type": "repeat",
+        "path": "{{baseDir}}templates/assets/plugins/repeat/popcorn.repeat.js"
       }
     ],
     "defaults" : [
       "quiz",
       "toc",
-      "text"
+      "text",
+      "repeat"
     ]
   }
 }
