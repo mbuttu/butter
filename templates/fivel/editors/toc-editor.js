@@ -1,6 +1,6 @@
 (function( Butter ){
 
-  Butter.Editor.register( "toc", "load!{{baseDir}}/templates/supported/fivel/editors/toc-editor.html", function( rootElement, butter, compiledLayout ) {
+  Butter.Editor.register( "toc", "load!{{baseDir}}/templates/fivel/editors/toc-editor.html", function( rootElement, butter, compiledLayout ) {
 
     var _this = this,
         _rootElement = rootElement,
