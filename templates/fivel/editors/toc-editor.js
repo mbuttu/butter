@@ -1,15 +1,21 @@
 (function( Butter ){
-
   Butter.Editor.register( "toc", "load!{{baseDir}}/templates/fivel/editors/toc-editor.html", function( rootElement, butter, compiledLayout ) {
-
     var _this = this,
         _rootElement = rootElement,
-        _fields = [ "start", "end", "target", "sections" ],
+        _fields = [ "target", "sections" ],
         _messageContainer = _rootElement.querySelector( "div.error-message" ),
-        _targets,
-        _trackEvent,
+        _sectionHTML = compiledLayout.querySelector( ".section" ),
+        config = butter.config.value( "toc" ),
+        sectionsFromConfig = config.sections,
         _elements = {},
-        _popcornOptions = {};
+        cueIds = [],
+        options = {},
+        _popcorn,
+        _targets, savedSections, lastA, target;
+
+    options.sections = [];
+
+    _popcorn = butter.currentMedia.popcorn.popcorn;
 
     function setErrorState( message ){
       if ( message ){
@@ -24,25 +30,32 @@
       }
     }
 
-    function updateTrackEvent(){
-      var sections = _rootElement.querySelector( "#sections" ).children;
+    function activate( a ) {
+      Popcorn.forEach( document.getElementsByClassName( "section-active" ), function( element ) {
+        element.classList.remove( "section-active" );
+      });
+      a.classList.add( "section-active" );
+    }
+
+    function linkElement( a, start ) {
+      return function( e ) {
+        activate( a );
+        _popcorn.currentTime( start );
+        _popcorn.play();
+      };
+    }
+
+    function updateSections(){
+      var sections = _elements.sections.children;
 
       setErrorState( false );
 
-      for ( idx = 0; idx < _fields.length; idx ++ ){
-        var field = _fields[ idx ],
-            element = _elements[ field ];
-        if ( field !== "sections" ){
-          _popcornOptions[ field ] = element.type === "checkbox" ? element.checked : element.value;
-        }
-      }
-
-      _popcornOptions.sections = [];
+      options.sections = [];
 
       for ( var idx = 0; idx < sections.length; idx++ ){
-        var section = _popcornOptions.sections[ idx ];
+        var section = options.sections[ idx ];
         if ( !section ){
-          section = _popcornOptions.sections[ idx ] = {};
+          section = options.sections[ idx ] = {};
         }
 
         section.title = sections[ idx ].querySelector( ".section-title" ).value;
@@ -50,205 +63,222 @@
         section.description = sections[ idx ].querySelector( ".section-description" ).value;
       }
 
-      try{
-        _trackEvent.update( _popcornOptions );
-      }
-      catch( e ){
-        setErrorState( e.toString() );
-      }
-    }
+      options.target = _elements.target.value;
 
-    function addSection( e ){
-      var divDescription = document.createElement( "div" ),
-          ul = document.createElement( "ul" ),
-          li = document.createElement( "li" ),
-          inputDescription = document.createElement( "textarea" ),
-          removeButton = document.createElement( "button" ),
-          inputTime = document.createElement( "input" ),
-          inputTitle = document.createElement( "input" ),
-          labelTime = document.createElement( "label" ),
-          labelTitle = document.createElement( "label" ),
-          labelDescription = document.createElement( "label" ),
-          labelStyle = "trackevent-property default input";
-
-      labelTitle.innerHTML = "Title";
-      labelTime.innerHTML = "Time";
-      labelDescription.innerHTML = "Description";
-
-      labelTime.setAttribute( "class", labelStyle );
-      labelTitle.setAttribute( "class", labelStyle );
-      labelDescription.setAttribute( "class", labelStyle );
-      divDescription.setAttribute( "class", labelStyle );
-
-      inputTitle.classList.add( "section-title" );
-      inputTime.classList.add( "section-time" );
-      inputDescription.classList.add( "section-description" );
-
-      removeButton.innerHTML = "-";
-      removeButton.addEventListener( "click", removeSection( removeButton, _elements.sections, divDescription ), false );
-
-      // add default here
-      inputTitle.value = "Title";
-      // add a better time?
-      inputTime.value = "00:00";
-      inputDescription.innerHTML = "Description";
-
-      li.appendChild( labelTitle );
-      li.appendChild( inputTitle );
-      li.appendChild( removeButton );
-
-      ul.appendChild( li );
-      li = document.createElement( "li" );
-
-      li.appendChild( labelTime );
-      li.appendChild( inputTime );
-
-      ul.appendChild( li );
-      li = document.createElement( "li" );
-
-      li.appendChild( labelDescription );
-      li.appendChild( inputDescription );
-
-      ul.appendChild( li );
-
-      divDescription.appendChild( ul );
-
-      _rootElement.querySelector( "#sections" ).appendChild( divDescription );
-      updateTrackEvent();
-    }
-
-    function removeSection( aAddButton, container, div ){
-      return function( e ){
-        if ( container.firstChild !== container.lastChild ){
-          container.removeChild( div );
-          updateTrackEvent();
-        }
-      };
+      onEditorOpen();
     }
 
     function onEditorOpen( e ){
-      var labelStyle = "trackevent-property default input",
-          container, ul, li, label, input, section, removeButton, sections;
+      var sections = _elements.sections.children,
+          cueId;
+
+      if ( target && options._container ) {
+        target.removeChild( options._container );
+      }
+
+      while ( (cueId = cueIds.pop()) ) {
+        _popcorn.removeTrackEvent( cueId );
+      }
+
+      while ( sections[ 0 ] ) {
+        _elements.sections.removeChild( sections[ 0 ] );
+      }
+
+      target = document.getElementById( options.target );
 
       // Create on section by default with a start time of 00:00
-      if ( !_popcornOptions.sections ) {
-        _popcornOptions.sections = [];
-        _popcornOptions.sections.push({
+      if ( options.sections.length === 0 ) {
+        options.sections = [];
+        options.sections.push({
           title: "Intro",
           time: "00:00",
           description: "This is the introduction"
         });
       }
 
-      sections = _popcornOptions.sections;
-
-      for ( var idx = 0; idx < sections.length; idx++ ){
-        section = sections[ idx ];
-        container = document.createElement( "div" );
-        container.setAttribute( "class", labelStyle );
-        ul = document.createElement( "ul" );
-        label = document.createElement( "label" );
-        input = document.createElement( "input" );
-        li = document.createElement( "li" );
-        removeButton = document.createElement( "button" );
-
-        removeButton.innerHTML = "-";
-        removeButton.addEventListener( "click", removeSection( removeButton, _elements.sections, container ), false );
-
-        label.innerHTML = "Title";
-        label.setAttribute( "class", labelStyle );
-        input.value = section.title;
-        input.setAttribute( "class", "section-title" );
-
-        li.appendChild( label );
-        li.appendChild( input );
-        li.appendChild( removeButton );
-        ul.appendChild( li );
-
-        label = document.createElement( "label" );
-        input = document.createElement( "input" );
-        li = document.createElement( "li" );
-
-        label.innerHTML = "Time";
-        label.setAttribute( "class", labelStyle );
-        input.value = section.time;
-        input.setAttribute( "class", "section-time" );
-
-        li.appendChild( label );
-        li.appendChild( input );
-        ul.appendChild( li );
-
-        label = document.createElement( "label" );
-        input = document.createElement( "textarea" );
-        li = document.createElement( "li" );
-
-        label.innerHTML = "Description";
-        label.setAttribute( "class", labelStyle );
-        input.innerHTML = section.description;
-        input.setAttribute( "class", "section-description" );
-
-        li.appendChild( label );
-        li.appendChild( input );
-        ul.appendChild( li );
-        container.appendChild( ul );
-        _elements.sections.appendChild( container );
-      }
+      setup();
 
       var select = _targets.querySelector( "select" ),
+          defaultTarget = select.querySelector( ".default-target-option" ),
           targets;
-      select.removeChild( select.querySelector( ".default-target-option" ) );
+
+      if ( defaultTarget ) {
+        select.removeChild( defaultTarget );
+      }
       targets = _targets.querySelector( "select" ).children;
 
       while ( targets[ 0 ] ){
         _elements.target.appendChild( targets[ 0 ] );
       }
 
-      _elements.target.value = _trackEvent.popcornOptions.target;
-
-      refreshUI();
+      _elements.target.value = options.target;
     }
 
+    function setup() {
+      options._container = document.createElement( "ul" );
 
-    function refreshUI() {
-      _elements.start.value = _popcornOptions.start;
-      _elements.end.value = _popcornOptions.end;
+      options._container.classList.add( "toc" );
+
+      options.sections.sort( function( a, b ) {
+        return Popcorn.util.toSeconds( a.time ) - Popcorn.util.toSeconds( b.time );
+      });
+
+      for ( var idx = 0; idx < options.sections.length; idx++ ) {
+        var section = options.sections[ idx ];
+        addSection( section );
+      }
+
+      // FIXME: the - 0.005 should be removed once this bug is fixed
+      // https://webmademovies.lighthouseapp.com/projects/65733-popcorn-maker/tickets/1976-setting-the-end-time-of-a-track-event-to-butterduration-sometimes-fails
+      // will last section be exported?
+      setupCue( butter.duration - 0.005 );
+
+      target && target.appendChild( options._container );
     }
 
-    function onTrackEventUpdated( e ){
-      refreshUI();
+    function setupCue( section ) {
+      var start, li, a, defn, startString, cueId, trackEvent;
+
+      // setup a cue without adding any new UI
+      if ( typeof section === "number" ) {
+        cueId = Popcorn.guid( "toc-cue" );
+        cueIds.push( cueId );
+        _popcorn.cue( cueId, section, function() {
+          if ( lastA ) {
+            lastA.classList.add( "section-complete" );
+          }
+        });
+
+        // Adding the target to the last trackEvent, since that is the one that will be queried later
+        trackEvent = Popcorn.getTrackEvent( _popcorn, cueId );
+        trackEvent.target = options.target;
+        return;
+      }
+
+      start = Popcorn.util.toSeconds( section.time );
+      li = document.createElement( "li" );
+      a = document.createElement( "a" );
+      defn = document.createElement( "div" );
+      startString = section.time;
+
+      a.innerHTML = section.title + " <span class=\"time-string\">" + startString + "</span> ";
+
+      a.addEventListener( "click", linkElement( a, start ), false );
+
+      defn.innerHTML = section.description;
+      defn.classList.add( "definition" );
+
+      li.appendChild( a );
+      li.appendChild( defn );
+      options._container.appendChild( li );
+
+      cueId = Popcorn.guid( "toc-cue" );
+      cueIds.push( cueId );
+
+      _popcorn.cue( cueId, start, function() {
+        var previousA = li.previousSibling && li.previousSibling.querySelector( "a" );
+
+        // If the current anchor element does not have the class "section-active",
+        // then that means the user did not skip to this section by clicking on the table of contents,
+        // and so the previous section can be marked as completed
+        if ( !a.classList.contains( "section-active" ) ) {
+          if ( previousA ) {
+            previousA.classList.add( "section-complete" );
+          }
+        }
+        activate( a );
+      });
+
+      if ( section ) {
+        trackEvent = Popcorn.getTrackEvent( _popcorn, cueId );
+        trackEvent.section = section;
+      }
+
+      lastA = a;
+    }
+
+    function addSection( section ) {
+      var sectionHTML, title, time, description, removeButton;
+
+      // Adding a new section
+      if ( !section ) {
+        section = {
+          title: "Section Title",
+          time: "00:00",
+          description: "Section description."
+        };
+      }
+
+      sectionHTML = _sectionHTML.cloneNode( true );
+
+      title = sectionHTML.querySelector( ".section-title" );
+      title.value = section.title;
+      removeButton = sectionHTML.querySelector( ".section-remove-button" );
+      removeButton.addEventListener( "click", removeSection( _elements.sections, sectionHTML ), false );
+      time = sectionHTML.querySelector( ".section-time" );
+      time.value = section.time;
+      description = sectionHTML.querySelector( ".section-description" );
+      description.innerHTML = section.description;
+      _elements.sections.appendChild( sectionHTML );
+
+      setupCue( section );
+    }
+
+    function removeSection( container, div ){
+      return function( e ){
+        if ( container.firstChild !== container.lastChild ){
+          container.removeChild( div );
+          updateSections();
+        }
+      };
     }
 
     Butter.Editor.TrackEventEditor( _this, butter, rootElement,{
       open: function( parentElement, trackEvent ){
-        function snapTrackEvent( e ){
-          _elements.start.value = 0;
-          // FIXME: the - 0.005 should be removed once this bug is fixed
-          // https://webmademovies.lighthouseapp.com/projects/65733-popcorn-maker/tickets/1976-setting-the-end-time-of-a-track-event-to-butterduration-sometimes-fails
-          _elements.end.value = butter.duration - 0.005;
-          updateTrackEvent();
-        }
-
-        _rootElement.querySelector( "#addSection" ).addEventListener( "click", addSection, false );
-        _rootElement.querySelector( "#snap" ).addEventListener( "click", snapTrackEvent, false );
+        _rootElement.querySelector( "#addSection" ).addEventListener( "click", function(){
+          addSection();
+        }, false );
 
         for ( var idx = 0; idx < _fields.length; idx++ ){
           var name = _fields[ idx ];
           _elements[ name ] = _rootElement.querySelector( "#" + name );
           _elements[ name ].addEventListener( "change", function( e ){
-            updateTrackEvent();
+            updateSections();
           }, false);
         }
 
+        options.target = config.target;
+        target = document.getElementById( options.target );
+
+        // TODO: Find out browser support for filter method
+        savedSections = Popcorn.getTrackEvents( _popcorn ).filter( function( theTrackEvent ) {
+          return theTrackEvent._id && theTrackEvent._id.indexOf( "toc-cue" ) > -1;
+        });
+
+        if ( savedSections.length > 0 ) {
+          var theTrackEvent;
+          options.sections = [];
+          for ( var sectionIdx = 0; sectionIdx < savedSections.length; sectionIdx++ ) {
+            theTrackEvent = savedSections[ sectionIdx ];
+            theTrackEvent.section && options.sections.push( theTrackEvent.section );
+            cueIds.push( theTrackEvent._id );
+          }
+          options.target = theTrackEvent.target;
+          target = document.getElementById( options.target );
+          options._container = target.querySelector( ".toc" );
+        }
+        else if ( sectionsFromConfig ) {
+          options.sections = sectionsFromConfig;
+        }
+
         _targets = _this.createTargetsList( [ butter.currentMedia ].concat( butter.targets ) );
-        _popcornOptions = trackEvent.popcornOptions;
-        _trackEvent = trackEvent;
         onEditorOpen();
-        _trackEvent.listen( "trackeventupdated", onTrackEventUpdated );
         _this.applyExtraHeadTags( compiledLayout );
       },
       close: function(){
-        _trackEvent.unlisten( "trackeventupdated", onTrackEventUpdated );
+        _this.removeExtraHeadTags();
       }
     });
   });
 }( window.Butter ));
+
