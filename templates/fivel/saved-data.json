@@ -45,7 +45,7 @@
                 {
                   "question": "Question 2",
                   "answers": [ "1", "2" ],
-                  "correctAnswer": 0,
+                  "correctAnswer": 1,
                   "explanation": "This is definitely philosophical. That's why 2 is correct. Since 1 can't be 2 if the question is 2."
                 }],
                 "paginate": false,
@@ -66,38 +66,6 @@
           "trackEvents": [
             {
               "id": "TrackEvent1",
-              "type": "toc",
-              "popcornOptions": {
-                "start": 0,
-                "end": 10,
-                "target": "Area2",
-                "sections": [
-                  {
-                    "time": "00:00",
-                    "title": "Intro",
-                    "description": "This is the introduction."
-                  },
-                  {
-                    "time": "00:05",
-                    "title": "Section 2",
-                    "description": "This is the second section."
-                  },
-                  {
-                    "time": "00:10",
-                    "title": "Section 3",
-                    "description": "This is the third section"
-                  }
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "Track2",
-          "id": "Track2",
-          "trackEvents": [
-            {
-              "id": "TrackEvent2",
               "type": "text",
               "popcornOptions": {
                 "start": 1,
@@ -105,7 +73,7 @@
                 "text": "test",
                 "target": "Area2"
               },
-              "track": "Track2",
+              "track": "Track1",
               "name": "TrackEvent1"
             }
           ]
