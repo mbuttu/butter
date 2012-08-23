@@ -20,6 +20,7 @@
     function setErrorState( message ){
       if ( message ){
         _messageContainer.innerHTML = message;
+        _messageContainer.parentNode.style.height = _messageContainer.offsetHeight + "px";
         _messageContainer.parentNode.style.visibility = "visible";
         _messageContainer.parentNode.classList.add( "open" );
       }
