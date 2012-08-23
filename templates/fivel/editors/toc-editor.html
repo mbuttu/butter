@@ -29,23 +29,6 @@
           <div class="error-message"></div>
         </div>
 
-        <fieldset class="trackevent-property default input units">
-          <label class="property-name">Start</label>
-          <div class="butter-form-append">
-            <input id="start" class="value" type="text" />
-            <span class="butter-unit">seconds</span>
-          </div>
-        </fieldset>
-
-        <fieldset class="trackevent-property default input units">
-          <label class="property-name">End</label>
-          <div class="butter-form-append">
-            <input id="end" class="value" type="text" />
-            <span class="butter-unit">seconds</span>
-          </div>
-          <input type="button" id="snap" value="Snap to Timeline" />
-        </fieldset>
-
         <fieldset class="trackevent-property targets">
           <label class="property-name">Target</label>
           <select id="target"></select>
@@ -62,4 +45,21 @@
   </div>
 </div>
 
+<div class="trackevent-property default input section">
+  <ul>
+    <li>
+      <label class="trackevent-property default input">Title</label>
+      <input class="section-title" />
+      <button class="section-remove-button">-</button>
+    </li>
+    <li>
+      <label class="trackevent-property default input">Time</label>
+      <input class="section-time" />
+    </li>
+    <li>
+      <label class="trackevent-property default input">Description</label>
+      <textarea class="section-description"></textarea>
+    </li>
+  </ul>
+</div>
 
