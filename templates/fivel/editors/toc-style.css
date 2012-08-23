@@ -1,0 +1,14 @@
+#sections ul {
+  list-style-type: none;
+  display: inline;
+  padding: 0px;
+}
+
+#sections ul input {
+  width: 220px;
+  margin-right: 2px;
+}
+
+#sections ul label {
+  margin-left: 0px;
+}
