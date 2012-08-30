@@ -1,17 +1,25 @@
-document.addEventListener( "DOMContentLoaded", function( e ){
-  Butter({
-    config: 'config.json',
-    ready: function( butter ){
-      butter.listen( "mediaready", function(){
-        // Force open and close the toc editor so that the table of contents will show when the page is laoded
-        butter.editor.openEditor( "toc", false, {} );
-        butter.editor.openEditor( "plugin-list", true );
-      });
+(function ( Butter ){
+  document.addEventListener( "DOMContentLoaded", function( e ){
+    Butter({
+      config: "config.json",
+      ready: function( butter ){
+        var trackEvent = butter.getTrackEventsByType( "toc" )[ 0 ],
+            tocPlugin = document.querySelector( "[data-popcorn-plugin-type=toc]" );
 
-      var tocButton = document.getElementById( "opentoc" );
-      tocButton.addEventListener( "click", function( e ) {
-        butter.editor.openEditor( "toc", false, {} );
-      });
-    }
-  });
-}, false );
+        if ( trackEvent ) {
+          // hide the toc track event so that the editor can only be opened
+          // from the template
+          trackEvent.view.element.style.display = "none";
+          // hide the toc plugin from the plugin-list editor so that only one
+          // toc can be added to a project
+          tocPlugin.style.display = "none";
+        }
+
+        var tocButton = document.getElementById( "opentoc" );
+        tocButton.addEventListener( "click", function( e ) {
+          butter.editor.openEditor( "toc", false, trackEvent );
+        });
+      }
+    });
+  }, false );
+}( window.Butter ));
