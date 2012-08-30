@@ -88,7 +88,9 @@
           setupCue( section );
         }
 
-        setupCue( _popcorn.duration() );
+        _popcorn.on( "loadedmetadata", function() {
+          setupCue( _popcorn.duration() );
+        });
 
         if ( !target && Popcorn.plugin.debug ) {
           throw new Error( "target container doesn't exist" );
