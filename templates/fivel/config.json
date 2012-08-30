@@ -21,6 +21,10 @@
       {
         "type": "repeat",
         "path": "{{baseDir}}templates/assets/plugins/repeat/popcorn.repeat.js"
+      },
+      {
+        "type": "toc",
+        "path": "{{baseDir}}templates/fivel/plugins/popcorn.toc.js"
       }
     ],
     "defaults" : [
@@ -28,23 +32,5 @@
       "text",
       "repeat"
     ]
-  },
-  "toc": {
-    "target": "Area2",
-    "sections": [{
-      "time": "00:00",
-      "title": "Intro",
-      "description": "This is the introduction."
-    },
-    {
-      "time": "00:05",
-      "title": "Section 2",
-      "description": "This is the second section."
-    },
-    {
-      "time": "00:10",
-      "title": "Section 3",
-      "description": "This is the third section"
-    }]
   }
 }
