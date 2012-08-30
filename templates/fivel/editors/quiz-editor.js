@@ -134,7 +134,7 @@
     function addAnswer( addButton, ul, li ){
       return function( e ){
         var removeButton = document.createElement( "button" ),
-            len = ul.children.length;
+            input;
 
         removeButton.innerHTML = "-";
         li.removeChild( li.lastChild );
@@ -271,7 +271,7 @@
 
     function populateDropdowns() {
       var questions = _rootElement.querySelector( "#questions" ).children,
-          idx, answersDropdown, answers;
+          idx, answersDropdown, answers, input;
 
       for ( var questionsIdx = 0; questionsIdx < _popcornOptions.questions.length; questionsIdx++ ){
         answers = _popcornOptions.questions[ questionsIdx ] && _popcornOptions.questions[ questionsIdx ].answers || [];
