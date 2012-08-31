@@ -3,22 +3,39 @@
 (function ( Popcorn ) {
 
   Popcorn.plugin( "toc", function( options ) {
-    var lastA;
 
     return {
       _setup: function( options ) {
         var target = document.getElementById( options.target ),
-            _popcorn = this;
+            _popcorn = this,
+            ul = document.createElement( "ul" ),
+            header = document.createElement( "div" );
 
         options.popcorn = Popcorn( this.media );
-        options._container = document.createElement( "ul" );
-        options._container.classList.add( "toc" );
+        options._container = document.createElement( "div" );
+
+        header.classList.add( "tocheader" );
+        header.innerHTML = options.title;
+
+        ul.classList.add( "toc" );
+
+        options._container.appendChild( header );
+        options._container.appendChild( ul );
 
         function activate( a ) {
-          Popcorn.forEach( document.getElementsByClassName( "section-active" ), function( element ) {
-            element.classList.remove( "section-active" );
+          var span = document.createElement( "span" );
+          span.innerHTML = "\u00A0\u00A0";
+          span.classList.add( "section-active" );
+
+          Popcorn.forEach( document.getElementsByClassName( "section-active-title" ), function( element ) {
+            element.classList.remove( "section-active-title" );
           });
-          a.classList.add( "section-active" );
+          Popcorn.forEach( document.getElementsByClassName( "section-active" ), function( element ) {
+            element.parentNode.removeChild( element );
+          });
+
+          a.insertBefore( span, a.firstChild );
+          a.parentNode.classList.add( "section-active-title" );
         }
 
         function linkElement( a, start ) {
@@ -30,14 +47,25 @@
         }
 
         function setupCue( section ) {
-          var start, li, a, defn, startString;
+          var start, li, titleContainer, a, defn, startString, span;
+
+          span = document.createElement( "span" );
+          span.innerHTML = "\u00A0\u00A0";
+          span.classList.add( "section-complete" );
 
           // setup a cue without adding any new UI
           if ( typeof section === "number" ) {
-            options.popcorn.cue( section, function() {
-              if ( lastA ) {
-                lastA.classList.add( "section-complete" );
+            _popcorn.cue( section, function() {
+              var target = document.getElementById( options.target ),
+                  anchorElements = target.querySelectorAll( "a" ),
+                  lastA = anchorElements[ anchorElements.length - 1 ],
+                  incompleteSection = lastA.querySelector( ".section-incomplete" );
+
+              // Remove incomplete status
+              if ( incompleteSection ) {
+                lastA.removeChild( incompleteSection );
               }
+              lastA.insertBefore( span, lastA.firstChild );
             });
 
             return;
@@ -45,36 +73,44 @@
 
           start = Popcorn.util.toSeconds( section.time );
           li = document.createElement( "li" );
+          titleContainer = document.createElement( "div" );
           a = document.createElement( "a" );
           defn = document.createElement( "div" );
           startString = section.time;
 
-          a.innerHTML = section.title + " <span class=\"time-string\">" + startString + "</span> ";
+          a.innerHTML = section.title + "<span class=\"section-incomplete\">\u00A0\u00A0</span><span class=\"time-string\">" + startString + "</span> ";
 
           a.addEventListener( "click", linkElement( a, start ), false );
 
           defn.innerHTML = section.description;
-          defn.classList.add( "definition" );
+          defn.classList.add( "section-description" );
 
-          li.appendChild( a );
+          titleContainer.classList.add( "section-title" );
+          titleContainer.appendChild( a );
+
+          li.appendChild( titleContainer );
           li.appendChild( defn );
-          options._container.appendChild( li );
+          options._container.querySelector( "ul" ).appendChild( li );
 
           _popcorn.cue( start, function() {
-            var previousA = li.previousSibling && li.previousSibling.querySelector( "a" );
+            var previousA = li.previousSibling && li.previousSibling.querySelector && li.previousSibling.querySelector( "a" );
 
             // If the current anchor element does not have the class "section-active",
             // then that means the user did not skip to this section by clicking on the table of contents,
             // and so the previous section can be marked as completed
             if ( !a.classList.contains( "section-active" ) ) {
               if ( previousA ) {
-                previousA.classList.add( "section-complete" );
+                incompleteSection = previousA.querySelector( ".section-incomplete" );
+
+                // Remove incomplete status
+                if ( incompleteSection ) {
+                  previousA.removeChild( incompleteSection );
+                }
+                previousA.insertBefore( span, previousA.firstChild );
               }
             }
             activate( a );
           });
-
-          lastA = a;
         }
 
         options.sections = options.sections || [];
@@ -132,7 +168,7 @@
         elem: "input",
         type: "text",
         label: "Title",
-        "default": "Table of Comments"
+        "default": "Table of Contents"
       },
       target: {
         elem: "input",

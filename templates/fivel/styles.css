@@ -1,0 +1,54 @@
+body {
+  height: 900px;
+}
+#main, .content-div {
+  float: left;
+}
+.content-div {
+  width: 200px;
+  height: 700px;
+  border: 3px solid #000;
+  margin: 5px;
+}
+.container-div {
+  float: left;
+  font-family: helvetica;
+  font-style: bold;
+}
+#main {
+  width: 500px;
+  height: 300px;
+}
+/* for FF11 specifically */
+#main video, #main audio {
+  width: inherit;
+  height: inherit;
+}
+.popcorn-question-list {
+  list-style-type: none;
+}
+.popcorn-correct-answer {
+  background-color: green;
+}
+
+.section-active {
+  border: 5px solid green;
+}
+
+.section-complete {
+  background-color: blue;
+}
+
+.content-div > ul {
+  list-style-type: none;
+  float: left;
+  width: 500px;
+}
+
+.quiz-question-container {
+  position: absolute;
+  top: 80px;
+  left: 200px;
+  color: white;
+}
+
