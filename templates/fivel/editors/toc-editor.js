@@ -35,9 +35,9 @@
           section = _popcornOptions.sections[ idx ] = {};
         }
 
-        section.title = sections[ idx ].querySelector( ".section-title" ).value;
-        section.time = sections[ idx ].querySelector( ".section-time" ).value;
-        section.description = sections[ idx ].querySelector( ".section-description" ).value;
+        section.title = sections[ idx ].querySelector( ".toc-section-title" ).value;
+        section.time = sections[ idx ].querySelector( ".toc-section-time" ).value;
+        section.description = sections[ idx ].querySelector( ".toc-section-description" ).value;
       }
 
       _popcornOptions.target = _elements.target.value;
@@ -104,13 +104,13 @@
 
       sectionHTML = _sectionHTML.cloneNode( true );
 
-      title = sectionHTML.querySelector( ".section-title" );
+      title = sectionHTML.querySelector( ".toc-section-title" );
       title.value = section.title;
-      removeButton = sectionHTML.querySelector( ".section-remove-button" );
+      removeButton = sectionHTML.querySelector( ".toc-section-remove-button" );
       removeButton.addEventListener( "click", removeSection( _elements.sections, sectionHTML ), false );
-      time = sectionHTML.querySelector( ".section-time" );
+      time = sectionHTML.querySelector( ".toc-section-time" );
       time.value = section.time;
-      description = sectionHTML.querySelector( ".section-description" );
+      description = sectionHTML.querySelector( ".toc-section-description" );
       description.innerHTML = section.description;
       _elements.sections.appendChild( sectionHTML );
     }
