@@ -142,7 +142,7 @@
 
       this.end = function( target ) {
         var resumeButton = addButton( "resumeButton", "Resume", function() {
-          options._container.style.display = "none";
+          options._parentContainer.style.display = "none";
           popcorn.play();
         }),
         resumeText = document.createElement( "p" );
@@ -312,7 +312,13 @@
         options.decorators = options.decorators || [];
 
         options._container = document.createElement( "div" );
-        options._container.style.display = "none";
+        // options._container.style.display = "none";
+
+        // FIXME: make this options._container?
+        options._parentContainer = document.createElement( "div" );
+        options._parentContainer.style.display = "none";
+        options._parentContainer.classList.add( "quiz-parent-container" );
+        options._parentContainer.appendChild( options._container );
 
         for ( var idx = 0; idx < options.decorators.length; idx++ ) {
           var decoratorOptions = options.decorators[ idx ];
@@ -338,7 +344,7 @@
         // if ( !options.question || !options.answers && Popcorn.plugin.debug ) {
         //   throw new Error( "a quiz needs a question and possible answers" );
         // }
-        target && target.appendChild( options._container );
+        target && target.appendChild( options._parentContainer );
       },
       start: function( event, options ) {
         function toggleButtons() {
@@ -366,17 +372,17 @@
           popcorn.pause();
         }
 
-        options._container.style.display = "inline";
+        options._parentContainer.style.display = "inline";
         if ( !quizComplete ) {
           quiz.start();
           toggleButtons();
         }
       },
       end: function( event, options ) {
-        options._container.style.display = "none";
+        options._parentContainer.style.display = "none";
       },
       _teardown: function( options ) {
-        document.getElementById( options.target ) && document.getElementById( options.target ).removeChild( options._container );
+        document.getElementById( options.target ) && document.getElementById( options.target ).removeChild( options._parentContainer );
       }
     };
   },
