@@ -7,7 +7,6 @@
     return {
       _setup: function( options ) {
         var target = document.getElementById( options.target ),
-            _popcorn = this,
             ul = document.createElement( "ul" ),
             header = document.createElement( "div" );
 
@@ -41,8 +40,8 @@
         function linkElement( a, start ) {
           return function( e ) {
             activate( a );
-            _popcorn.currentTime( start );
-            _popcorn.play();
+            options.popcorn.currentTime( start );
+            options.popcorn.play();
           };
         }
 
@@ -55,7 +54,7 @@
 
           // setup a cue without adding any new UI
           if ( typeof section === "number" ) {
-            _popcorn.cue( section, function() {
+            options.popcorn.cue( section, function() {
               var target = document.getElementById( options.target ),
                   anchorElements = target.querySelectorAll( "a" ),
                   lastA = anchorElements[ anchorElements.length - 1 ],
@@ -92,13 +91,14 @@
           li.appendChild( defn );
           options._container.querySelector( "ul" ).appendChild( li );
 
-          _popcorn.cue( start, function() {
-            var previousA = li.previousSibling && li.previousSibling.querySelector && li.previousSibling.querySelector( "a" );
+          options.popcorn.cue( start, function() {
+            var previousA = li.previousSibling && li.previousSibling.querySelector && li.previousSibling.querySelector( "a" ),
+                incompleteSection;
 
-            // If the current anchor element does not have the class "section-active",
+            // If the current anchor element does not have a span tag with the class "section-active",
             // then that means the user did not skip to this section by clicking on the table of contents,
             // and so the previous section can be marked as completed
-            if ( !a.classList.contains( "section-active" ) ) {
+            if ( !a.querySelector( ".section-active" ) ) {
               if ( previousA ) {
                 incompleteSection = previousA.querySelector( ".section-incomplete" );
 
@@ -124,8 +124,8 @@
           setupCue( section );
         }
 
-        _popcorn.on( "loadedmetadata", function() {
-          setupCue( _popcorn.duration() );
+        options.popcorn.on( "loadedmetadata", function() {
+          setupCue( options.popcorn.duration() );
         });
 
         if ( !target && Popcorn.plugin.debug ) {
