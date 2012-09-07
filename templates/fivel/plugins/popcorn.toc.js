@@ -52,24 +52,6 @@
           span.innerHTML = "\u00A0\u00A0";
           span.classList.add( "section-complete" );
 
-          // setup a cue without adding any new UI
-          if ( typeof section === "number" ) {
-            options.popcorn.cue( section, function() {
-              var target = document.getElementById( options.target ),
-                  anchorElements = target.querySelectorAll( "a" ),
-                  lastA = anchorElements[ anchorElements.length - 1 ],
-                  incompleteSection = lastA.querySelector( ".section-incomplete" );
-
-              // Remove incomplete status
-              if ( incompleteSection ) {
-                lastA.removeChild( incompleteSection );
-              }
-              lastA.insertBefore( span, lastA.firstChild );
-            });
-
-            return;
-          }
-
           start = Popcorn.util.toSeconds( section.time );
           li = document.createElement( "li" );
           titleContainer = document.createElement( "div" );
@@ -124,8 +106,21 @@
           setupCue( section );
         }
 
-        options.popcorn.on( "loadedmetadata", function() {
-          setupCue( options.popcorn.duration() );
+        options.popcorn.on( "ended", function() {
+          var target = document.getElementById( options.target ),
+              anchorElements = target.querySelectorAll( "a" ),
+              lastA = anchorElements[ anchorElements.length - 1 ],
+              incompleteSection = lastA.querySelector( ".section-incomplete" ),
+              span = document.createElement( "span" );
+
+          span.innerHTML = "\u00A0\u00A0";
+          span.classList.add( "section-complete" );
+
+          // Remove incomplete status
+          if ( incompleteSection ) {
+            lastA.removeChild( incompleteSection );
+            lastA.insertBefore( span, lastA.firstChild );
+          }
         });
 
         if ( !target && Popcorn.plugin.debug ) {
