@@ -9,4 +9,5 @@ define([
   "dialog/dialogs/quit-confirmation",
   "dialog/dialogs/save-as",
   "dialog/dialogs/share",
+  "dialog/dialogs/export"
 ], function() {} );
