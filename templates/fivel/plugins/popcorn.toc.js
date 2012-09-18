@@ -8,7 +8,9 @@
       _setup: function( options ) {
         var target = document.getElementById( options.target ),
             ul = document.createElement( "ul" ),
-            header = document.createElement( "div" );
+            header = document.createElement( "div" ),
+            anchorList = {},
+            canBeCompleted = true;
 
         options.popcorn = Popcorn( this.media );
         options._container = document.createElement( "div" );
@@ -39,9 +41,17 @@
 
         function linkElement( a, start ) {
           return function( e ) {
+            // Temporarily remove the listener to the seek event
+            options.popcorn.off( "seeking", onSeeking );
             activate( a );
             options.popcorn.currentTime( start );
             options.popcorn.play();
+            // Listen for the "seeking" event again once the video starts to play
+            // FIXME: doesn't work if video is not paused
+            options.popcorn.on( "play", function onPlay( e ) {
+              options.popcorn.on( "seeking", onSeeking );
+              options.popcorn.off( "play", onPlay );
+            });
           };
         }
 
@@ -73,9 +83,16 @@
           li.appendChild( defn );
           options._container.querySelector( "ul" ).appendChild( li );
 
-          options.popcorn.cue( start, function() {
+          options.popcorn.cue( start, onCue );
+
+          function onCue() {
+            if ( !canBeCompleted ) {
+              activate( a );
+              return;
+            }
+
             var previousA = li.previousSibling && li.previousSibling.querySelector && li.previousSibling.querySelector( "a" ),
-                incompleteSection;
+                incompleteSection, anchor;
 
             // If the current anchor element does not have a span tag with the class "section-active",
             // then that means the user did not skip to this section by clicking on the table of contents,
@@ -92,7 +109,15 @@
               }
             }
             activate( a );
-          });
+          }
+
+          anchorList[ section.time ] = anchorList[ section.time ] || {};
+          anchor = anchorList[ section.time ];
+          // anchor = anchor || {};
+          anchor.anchorElement = a;
+          anchor.section = section;
+          // anchor.timeSeeked = 0;
+          anchor.skippedSegements = anchor.skippedSegements || [];
         }
 
         options.sections = options.sections || [];
@@ -107,6 +132,11 @@
         }
 
         options.popcorn.on( "ended", function() {
+
+          if ( !canBeCompleted ) {
+            return;
+          }
+
           var target = document.getElementById( options.target ),
               anchorElements = target.querySelectorAll( "a" ),
               lastA = anchorElements[ anchorElements.length - 1 ],
@@ -122,6 +152,113 @@
             lastA.insertBefore( span, lastA.firstChild );
           }
         });
+
+        options.popcorn.on( "seeking", onSeeking );
+
+        function onSeeking( e ) {
+          var timeStarted = Math.floor( options.popcorn.currentTime() ),
+              toSeconds = Popcorn.util.toSeconds,
+              anchorStarted = getAnchor(),
+              sectionStarted = anchorStarted.section;
+
+          // The current section cannot be completed any time the user seeks, see onClick
+          // canBeCompleted = false;
+
+          options.popcorn.off( "seeking", onSeeking );
+          options.popcorn.on( "click", onClick );
+          options.popcorn.on( "seeked", onSeeked );
+
+          function getAnchor() {
+            var currentTime = options.popcorn.currentTime(),
+                idx = options.sections.length - 1,
+                start = options.sections[ idx ].time,
+                startTime = toSeconds( start );
+
+            while ( currentTime < startTime ) {
+              idx = idx - 1;
+              start = options.sections[ idx ].time;
+              startTime = toSeconds( start );
+            }
+
+            return anchorList[ start ];
+          }
+
+          // When clicking on the timeline to jump to another point in the video,
+          // the "click" event is always fired after the "seeking" event, so this is
+          // where it is turned back on
+          function onClick( e ) {
+            var timeEnded = Math.floor( options.popcorn.currentTime() ),
+                timeSeeked = timeEnded - timeStarted,
+                startedTimeSeeked = timeSeeked,
+                currentTimeSeeked = 0,
+                currentAnchor = getAnchor(),
+                currentSection = currentAnchor.section,
+                startedSectionTime = toSeconds( sectionStarted.time ),
+                currentSectionTime = toSeconds( currentSection.time ),
+                seekedCurrentSection, idx, delta, segment;
+
+            function addSkippedSegment( segments, start, end ) {
+              var segment = segments[ 0 ];
+
+              if ( !segment ) {
+                segments.push({
+                  start: start,
+                  end: end
+                });
+                return segments;
+              }
+
+              // start and end may cover multiple existing skipped segments, so remove the ones it covers and add new segment in the end
+              if ( start < segment.start && end > segment.end ) {
+                return addSkippedSegment( segments.slice( 1 ), start, end );
+              }
+
+              if ( start >= segment.start && end <= segment.end ) {
+                return segments;
+              }
+
+              if ( start < segment.start && end >= segment.start ) {
+                segment.start = start;
+                return segments;
+              }
+
+              if ( end > segment.end && start <= segment.end ) {
+                segment.end = end;
+                return segments;
+              }
+
+              return [ segment ].concat( addSkippedSegment( segments.slice( 1 ), start, end ) );
+            }
+
+            // Only if the user seeks forward
+            if ( timeSeeked > 0 ) {
+              // Seeked into the next section
+              if ( currentSectionTime > startedSectionTime ) {
+                startedTimeSeeked = currentSectionTime - timeStarted;
+                currentTimeSeeked = timeSeeked - startedTimeSeeked;
+                currentAnchor.skippedSegements = addSkippedSegment( currentAnchor.skippedSegements, currentSectionTime, ( currentSectionTime + currentTimeSeeked ) );
+              }
+
+              anchorStarted.skippedSegements = addSkippedSegment( anchorStarted.skippedSegements, timeStarted, ( timeStarted + startedTimeSeeked ) );
+
+              options.popcorn.on( "seeking", onSeeking );
+              options.popcorn.on( "seeking", onSeeking );
+              // Temporarily remove the click handler, so that a section isn't
+              // pushed to skippedSegements when the user pauses the video
+              options.popcorn.off( "click", onClick );
+              // Add the click handler back on once the video starts to play
+              options.popcorn.on( "play", function onPlay( e) {
+                options.popcorn.on( "click", onClick );
+              });
+            }
+          }
+
+          function onSeeked( e ) {
+            if ( !options.popcorn.ended() ) {
+              activate( getAnchor().anchorElement );
+            }
+          }
+        }
 
         if ( !target && Popcorn.plugin.debug ) {
           throw new Error( "target container doesn't exist" );
