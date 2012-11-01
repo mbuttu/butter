@@ -305,11 +305,16 @@
 
     return {
       _setup: function( options ) {
-        var target = document.getElementById( options.target );
+        var target = document.getElementById( options.target ),
+            title = document.createElement( "div" );
 
+        title.classList.add( "quiz-title" );
         paginated = options.paginate = typeof options.paginate === "undefined" ? true : !!options.paginate;
 
         options.decorators = options.decorators || [];
+        options.title = options.title || "Quiz";
+
+        title.innerHTML = options.title;
 
         options._container = document.createElement( "div" );
         // options._container.style.display = "none";
@@ -318,6 +323,7 @@
         options._parentContainer = document.createElement( "div" );
         options._parentContainer.style.display = "none";
         options._parentContainer.classList.add( "quiz-parent-container" );
+        options._parentContainer.appendChild( title );
         options._parentContainer.appendChild( options._container );
 
         for ( var idx = 0; idx < options.decorators.length; idx++ ) {
@@ -420,6 +426,11 @@
         elem: "input",
         type: "number",
         label: "End Time"
+      },
+      title: {
+        elem: "input",
+        type: "textarea",
+        label: "Title"
       }
     }
   });
