@@ -48,7 +48,7 @@
         _popcornOptions.questions[ idx ].question = questions[ idx ].querySelector( "textarea" ).value;
         possibleAnswers = questions[ idx ].querySelector( "select" );
         explanation = questions[ idx ].querySelector( ".quiz-explanation" );
-        _popcornOptions.questions[ idx ].correctAnswer = possibleAnswers.selectedIndex - 1;
+        _popcornOptions.questions[ idx ].correctAnswer = possibleAnswers.selectedIndex -= possibleAnswers.selectedIndex === -1 ? 0 : 1;
         _popcornOptions.questions[ idx ].explanation = explanation.value;
         var answersList = questions[ idx ].querySelectorAll( "ul li > input ");
         for ( var answersIdx = 0; answersIdx < answersList.length; answersIdx++ ){
