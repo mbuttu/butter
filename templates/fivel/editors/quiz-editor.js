@@ -4,7 +4,7 @@
 
     var _this = this,
         _rootElement = rootElement,
-        _fields = [ "target", "paginate", "results", "questions", "start", "end" ],
+        _fields = [ "target", "paginate", "results", "questions", "start", "end", "title" ],
         _messageContainer = _rootElement.querySelector( "div.error-message" ),
         _targets,
         _trackEvent,
@@ -301,6 +301,7 @@
 
     function refreshUI() {
       populateDropdowns();
+      _elements.title.value = _popcornOptions.title;
       _elements.start.value = _popcornOptions.start;
       _elements.end.value = _popcornOptions.end;
       _elements.paginate.checked = !!_popcornOptions.paginate;
