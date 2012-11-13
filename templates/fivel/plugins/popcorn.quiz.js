@@ -308,7 +308,7 @@
     }
 
     return {
-      _setup: function( options ) {
+      _setup: function() {
         var target = document.getElementById( options.target ),
             title = document.createElement( "div" );
 
@@ -356,7 +356,7 @@
         // }
         target && target.appendChild( options._parentContainer );
       },
-      start: function( event, options ) {
+      start: function( event ) {
         function toggleButtons() {
           var previousButton = addButton( "previousButton", previousButtonText, function() {
                 quiz.previous();
@@ -388,10 +388,10 @@
           toggleButtons();
         }
       },
-      end: function( event, options ) {
+      end: function( event ) {
         options._parentContainer.style.display = "none";
       },
-      _teardown: function( options ) {
+      _teardown: function() {
         document.getElementById( options.target ) && document.getElementById( options.target ).removeChild( options._parentContainer );
       }
     };
