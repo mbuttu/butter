@@ -19,8 +19,8 @@
         "path": "{{baseDir}}external/popcorn-js/plugins/text/popcorn.text.js"
       },
       {
-        "type": "repeat",
-        "path": "{{baseDir}}templates/assets/plugins/repeat/popcorn.repeat.js"
+        "type": "loop",
+        "path": "{{baseDir}}templates/assets/plugins/loopPlugin/popcorn.loopPlugin.js"
       },
       {
         "type": "toc",
@@ -30,7 +30,7 @@
     "defaults" : [
       "quiz",
       "text",
-      "repeat"
+      "loop"
     ]
   }
 }

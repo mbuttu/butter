@@ -16,7 +16,7 @@
         options._container = document.createElement( "div" );
 
         header.classList.add( "tocheader" );
-        header.innerHTML = options.title;
+        header.innerHTML = options.title || "Table of Contents";
 
         ul.classList.add( "toc" );
 

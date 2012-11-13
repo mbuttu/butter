@@ -1,6 +1,6 @@
 (function ( Butter ){
   document.addEventListener( "DOMContentLoaded", function( e ){
-    Butter({
+    Butter.init({
       config: "config.json",
       ready: function( butter ){
         var trackEvent = butter.getTrackEventsByType( "toc" )[ 0 ],
