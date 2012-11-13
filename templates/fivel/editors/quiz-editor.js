@@ -312,7 +312,7 @@
       refreshUI();
     }
 
-    Butter.Editor.TrackEventEditor( _this, butter, rootElement,{
+    Butter.Editor.TrackEventEditor.extend( _this, butter, rootElement,{
       open: function( parentElement, trackEvent ){
 
         _rootElement.querySelector( "#addQuestion" ).addEventListener( "click", addQuestion, false );

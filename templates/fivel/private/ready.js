@@ -7,7 +7,12 @@
           butter.unlisten("editoropened", onEditorOpened);
           var trackEvent = butter.getTrackEventsByType( "toc" )[ 0 ],
               tocPlugin = document.querySelector( "[data-popcorn-plugin-type=toc]" ),
-              popcornString = "";
+              popcornString = "",
+              script;
+
+          script = document.createElement( "script" );
+          script.src = "//www.mozilla.org/tabzilla/media/js/tabzilla.js";
+          document.body.appendChild( script );
 
           function sendToServer( e ){
             $.ajax({
