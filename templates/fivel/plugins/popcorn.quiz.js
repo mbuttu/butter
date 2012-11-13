@@ -184,6 +184,10 @@
         target.appendChild( resumeButton );
 
         quizComplete = true;
+        popcorn.emit("quizended", {
+          score: correctAnswers,
+          outOf: questionable
+        });
       };
     }
 
