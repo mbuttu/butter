@@ -1,6 +1,7 @@
 // PLUGIN: toc
 
 (function ( Popcorn ) {
+  var loaded = false;
 
   Popcorn.plugin( "toc", function( options ) {
 
@@ -55,21 +56,39 @@
           };
         }
 
-        function setupCue( section ) {
-          var start, li, titleContainer, a, defn, startString, span;
+        function setupCue( section, nextSectionEndTime ) {
+          var start, end, duration, li, titleContainer, a, defn, startString, span,
+              seconds, minutes;
 
           span = document.createElement( "span" );
           span.innerHTML = "\u00A0\u00A0";
           span.classList.add( "section-complete" );
 
           start = Popcorn.util.toSeconds( section.time );
+          end = Popcorn.util.toSeconds( nextSectionEndTime );
           li = document.createElement( "li" );
           titleContainer = document.createElement( "div" );
           a = document.createElement( "a" );
           defn = document.createElement( "div" );
           startString = section.time;
 
-          a.innerHTML = section.title + "<span class=\"section-incomplete\">\u00A0\u00A0</span><span class=\"time-string\">" + startString + "</span> ";
+          duration = end - start;
+
+          // Format the duration
+          //
+          // FIXME: Checking if duration === 1 is an assumption.
+          // If the duration is 1, then it's a quiz, so don't display the duration.
+          if (duration === 1) {
+            duration = "";
+          } else if (duration < 60) {
+            duration = duration + "s";
+          } else {
+            seconds = duration % 60;
+            minutes = (duration - seconds) / 60;
+            duration = minutes + "m" + seconds + "s";
+          }
+
+          a.innerHTML = section.title + "<span class=\"section-incomplete\">\u00A0\u00A0</span><span class=\"time-string\">" + duration + "</span> ";
 
           a.addEventListener( "click", linkElement( a, start ), false );
 
@@ -126,13 +145,31 @@
           return Popcorn.util.toSeconds( a.time ) - Popcorn.util.toSeconds( b.time );
         });
 
-        for ( var idx = 0; idx < options.sections.length; idx++ ) {
-          var section = options.sections[ idx ];
-          setupCue( section );
+        // Need to wait until the media is ready, so that we can get the media's duration
+        options.popcorn.on( "loadeddata", function() {
+          loaded = true;
+          onLoaded();
+        });
+
+        // This plugin can be torn down and rebuilt many times, so make sure that onLoaded is called.
+        // The loadeddata event is only called once when the media is ready.
+        if (loaded) {
+          onLoaded();
         }
 
-        options.popcorn.on( "ended", function() {
+        options.popcorn.on( "ended", onEnded );
 
+        function onLoaded() {
+          for ( var idx = 0; idx < options.sections.length; idx++ ) {
+            var section = options.sections[ idx ],
+                nextSection = options.sections[ idx + 1];
+            setupCue( section, nextSection ? nextSection.time : Math.floor( options.popcorn.duration() ) );
+          }
+
+          options.popcorn.on( "seeking", onSeeking );
+        }
+
+        function onEnded() {
           if ( !canBeCompleted ) {
             return;
           }
@@ -151,9 +188,7 @@
             lastA.removeChild( incompleteSection );
             lastA.insertBefore( span, lastA.firstChild );
           }
-        });
-
-        options.popcorn.on( "seeking", onSeeking );
+        }
 
         function onSeeking( e ) {
           var timeStarted = Math.floor( options.popcorn.currentTime() ),
@@ -267,11 +302,9 @@
         target && target.appendChild( options._container );
       },
 
-      start: function( event, options ) {
-      },
+      start: function( event, options ) {},
 
-      end: function( event, options ) {
-      },
+      end: function( event, options ) {},
 
       _teardown: function( options ) {
         document.getElementById( options.target ) && document.getElementById( options.target ).removeChild( options._container );
