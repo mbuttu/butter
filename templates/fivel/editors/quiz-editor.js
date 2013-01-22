@@ -70,6 +70,10 @@
       }
       _popcornOptions.paginate = _elements.paginate.checked;
 
+      // Convert the start and end times to numbers
+      _popcornOptions.start = +_popcornOptions.start;
+      _popcornOptions.end = +_popcornOptions.end;
+
       try{
         _trackEvent.update( _popcornOptions );
       }
