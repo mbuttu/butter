@@ -2,10 +2,11 @@
   "name": "fivel",
   "title": "Popcorn Maker",
   "template": "index.html",
-  "baseDir": "../../../",
+  "baseDir": "../../",
   "savedDataUrl": "saved-data.json",
   "editor": {
     "quiz": "{{baseDir}}templates/fivel/editors/quiz-editor.js",
+    "text": "{{baseDir}}templates/assets/editors/text/text-editor.js",
     "toc": "{{baseDir}}templates/fivel/editors/toc-editor.js",
     "slider": "{{baseDir}}templates/fivel/editors/slider-editor.js"
   },
@@ -44,5 +45,6 @@
       "slider",
       "pausePlugin"
     ]
-  }
+  },
+  "maxPluginZIndex": 1000
 }
