@@ -9,19 +9,25 @@
       _setup: function( options ) {
         var target = document.getElementById( options.target ),
             ul = document.createElement( "ul" ),
-            header = document.createElement( "div" ),
             anchorList = {},
-            canBeCompleted = true;
+            canBeCompleted = true,
+            header;
 
         options.popcorn = Popcorn( this.media );
         options._container = document.createElement( "div" );
 
-        header.classList.add( "tocheader" );
-        header.innerHTML = options.title || "Table of Contents";
+        if ( options.title ) {
+          header = document.createElement( "div" ),
+          header.classList.add( "tocheader" );
+          header.innerHTML = options.title;
+        }
 
         ul.classList.add( "toc" );
 
-        options._container.appendChild( header );
+        if ( header ) {
+          options._container.appendChild( header );
+        }
+
         options._container.appendChild( ul );
 
         function activate( a ) {
@@ -332,8 +338,7 @@
       title: {
         elem: "input",
         type: "text",
-        label: "Title",
-        "default": "Table of Contents"
+        label: "Title"
       },
       target: {
         elem: "input",
