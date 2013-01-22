@@ -30,13 +30,19 @@
       {
         "type": "slider",
         "path": "{{baseDir}}templates/fivel/plugins/slider/popcorn.slider.js"
+      },
+      {
+        "type": "pausePlugin",
+        "displayName": "Pause",
+        "path": "{{baseDir}}templates/assets/plugins/pausePlugin/popcorn.pausePlugin.js"
       }
     ],
     "defaults" : [
       "quiz",
       "text",
       "loop",
-      "slider"
+      "slider",
+      "pausePlugin"
     ]
   }
 }
