@@ -145,8 +145,8 @@
           options._parentContainer.style.display = "none";
           popcorn.play();
         }),
-        resumeText = document.createElement( "p" );
 
+        resumeText = document.createElement( "p" );
         resumeText.innerHTML = "Quiz is complete!";
 
         function checkAnswers() {
@@ -173,10 +173,6 @@
         }
 
         checkAnswers();
-
-        if ( paginated ) {
-          hideAll();
-        }
 
         decoratable( "end", target );
 
@@ -209,7 +205,13 @@
         var resultsDiv = document.createElement( "div" );
 
         function checkAnswers() {
-          var correctAnswerDiv, correctAnswerDivId, theQuestion, correctAnswer, selectedAnswer, questionContainer;
+          var correctAnswerDiv, correctAnswerDivId, theQuestion,
+              correctAnswer, selectedAnswer, questionContainer;
+
+          // If it's paginated, showAll so that the results can be displayed
+          if (paginated) {
+            showAll();
+          }
 
           for ( var questionIdx = 0; questionIdx < questions.length; questionIdx++ ) {
             correctAnswerDiv = document.createElement( "div" );
@@ -220,25 +222,23 @@
             // document.getElementById( "answer-" + quizNumber + "-" + questionIdx + "-" + correctAnswer ).parentNode.setAttribute( "class", "" );
             // what if nothing is selected?
             if ( !theQuestion.isCorrect ) {
-              if ( !paginated ) {
-                var p = document.createElement( "p" );
-                questionContainer = document.getElementById( "questionContainer-" + quizNumber + "-" + questionIdx );
-                document.getElementById( correctAnswerDivId ) && questionContainer.removeChild( document.getElementById( correctAnswerDivId ) );
-                p.innerHTML = "Correct Answer: " + theQuestion.answers[ correctAnswer ];
+              var p = document.createElement( "p" );
+              questionContainer = document.getElementById( "questionContainer-" + quizNumber + "-" + questionIdx );
+              document.getElementById( correctAnswerDivId ) && questionContainer.removeChild( document.getElementById( correctAnswerDivId ) );
+              p.innerHTML = "Correct Answer: " + theQuestion.answers[ correctAnswer ];
+              correctAnswerDiv.appendChild( p );
+
+              if ( theQuestion.explanation ) {
+                p = document.createElement( "p" );
+                p.innerHTML = "Explanation: " + theQuestion.explanation;
                 correctAnswerDiv.appendChild( p );
-
-                if ( theQuestion.explanation ) {
-                  p = document.createElement( "p" );
-                  p.innerHTML = "Explanation: " + theQuestion.explanation;
-                  correctAnswerDiv.appendChild( p );
-                }
-
-                correctAnswerDiv.setAttribute( "id", correctAnswerDivId );
-                questionContainer.appendChild( correctAnswerDiv );
-
-                // TODO: Add to class list?
-                document.getElementById( "answer-" + quizNumber + "-" + questionIdx + "-" + correctAnswer ).parentNode.setAttribute( "class", "popcorn-correct-answer" );
               }
+
+              correctAnswerDiv.setAttribute( "id", correctAnswerDivId );
+              questionContainer.appendChild( correctAnswerDiv );
+
+              // TODO: Add to class list?
+              document.getElementById( "answer-" + quizNumber + "-" + questionIdx + "-" + correctAnswer ).parentNode.setAttribute( "class", "popcorn-correct-answer" );
             }
           }
         }
