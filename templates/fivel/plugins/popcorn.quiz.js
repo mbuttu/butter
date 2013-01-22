@@ -141,7 +141,7 @@
       };
 
       this.end = function( target ) {
-        var resumeButton = addButton( "resumeButton", "Resume", function() {
+        var resumeButton = addButton( "resumeButton", "Finish", function() {
           options._parentContainer.style.display = "none";
           popcorn.play();
         }),
