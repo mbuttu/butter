@@ -8,20 +8,20 @@
     {
       "id": "Target1",
       "name": "Target1",
-      "element": "Area1"
+      "element": "quiz-container"
     },
     {
       "id": "Target2",
       "name": "Target2",
-      "element": "Area2"
+      "element": "toc"
     }
   ],
   "media": [
     {
       "id": "Media0",
       "name": "Media0",
-      "url": [ "../../external/popcorn-js/test/trailer.mp4", "../../external/popcorn-js/test/trailer.webm" ],
-      "target": "main",
+      "url": [ "http://videos.mozilla.org/serv/webmademovies/trailer.ogv", "http://videos.mozilla.org/serv/webmademovies/trailer.mp4" ],
+      "target": "video",
       "duration": 64.54166412353516,
       "controls": true,
       "tracks": [
@@ -33,8 +33,9 @@
               "id": "TrackEvent0",
               "type": "quiz",
               "popcornOptions": {
-                "start": 0,
-                "end": 3,
+                "title": "Quiz",
+                "start": 5,
+                "end": 6,
                 "questions": [{
                   "question": "Does HTML5 work in IE8?",
                   "answers": [ "Yes", "No" ],
@@ -51,7 +52,7 @@
                   "when": "end",
                   "what": "results"
                 }],
-                "target": "Area1"
+                "target": "video-container"
               },
               "track": "Layer0",
               "name": "TrackEvent0"
@@ -62,7 +63,7 @@
               "popcornOptions": {
                 "start": 0,
                 "end": 10,
-                "target": "Area2",
+                "target": "toc",
                 "sections": [
                   {
                     "time": "00:00",
@@ -71,6 +72,11 @@
                   },
                   {
                     "time": "00:05",
+                    "title": "Quiz",
+                    "description": "Quiz about tips in this video."
+                  },
+                  {
+                    "time": "00:06",
                     "title": "Section 2",
                     "description": "This is the second section."
                   },
@@ -95,7 +101,7 @@
                 "start": 1,
                 "end": 2,
                 "text": "test",
-                "target": "Area2"
+                "target": "toc"
               },
               "track": "Layer1",
               "name": "TrackEvent1"
