@@ -78,14 +78,14 @@
           //
           // FIXME: Checking if duration === 1 is an assumption.
           // If the duration is 1, then it's a quiz, so don't display the duration.
-          if (duration === 1) {
+          if ( duration === 1 ) {
             duration = "";
-          } else if (duration < 60) {
-            duration = duration + "s";
+          } else if ( duration < 60 ) {
+            duration = Math.floor( duration ) + "s";
           } else {
             seconds = duration % 60;
-            minutes = (duration - seconds) / 60;
-            duration = minutes + "m" + seconds + "s";
+            minutes = ( duration - seconds ) / 60;
+            duration = Math.floor( minutes ) + "m" + Math.floor( seconds ) + "s";
           }
 
           a.innerHTML = section.title + "<span class=\"section-incomplete\">\u00A0\u00A0</span><span class=\"time-string\">" + duration + "</span> ";
