@@ -18,7 +18,7 @@
       },
       {
         "type": "text",
-        "path": "{{baseDir}}external/popcorn-js/plugins/text/popcorn.text.js"
+        "path": "{{baseDir}}templates/assets/plugins/text/popcorn.text.js"
       },
       {
         "type": "loop",

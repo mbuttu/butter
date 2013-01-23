@@ -100,8 +100,12 @@
               "popcornOptions": {
                 "start": 1,
                 "end": 2,
+                "position": "bottom",
+                "alignment": "center",
+                "transition": "popcorn-fade",
+                "fontSize": "10%",
                 "text": "test",
-                "target": "toc"
+                "target": "video-container"
               },
               "track": "Layer1",
               "name": "TrackEvent1"
