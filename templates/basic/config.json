@@ -10,5 +10,13 @@
     "text": "{{baseDir}}templates/assets/editors/text/text-editor.js",
     "twitter": "{{baseDir}}templates/assets/editors/twitter/twitter-editor.js"
   },
+  "plugin": {
+    "plugins": [
+      {
+        "type": "text",
+        "path": "{{baseDir}}external/popcorn-js/plugins/text/popcorn.text.js"
+      }
+    ]
+  },
   "maxPluginZIndex": 1000
 }
