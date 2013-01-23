@@ -358,21 +358,27 @@
       },
       start: function( event ) {
         function toggleButtons() {
-          var previousButton = addButton( "previousButton", previousButtonText, function() {
-                quiz.previous();
-                previousButton.style.display = quiz.hasPrevious() ? "inline" : "none";
-              }),
-              continueButton = addButton( "continueButton", continueButtonText, function() {
-                if ( quiz.hasNext() ) {
-                  quiz.next();
-                  previousButton.style.display = "inline";
-                }
-                else {
-                  quiz.end( options._container );
-                  continueButton.style.display = "none";
-                  previousButton.style.display = "none";
-                }
-              });
+          var previousButton, continueButton;
+
+          previousButton = addButton( "previousButton", previousButtonText, function() {
+            quiz.previous();
+            previousButton.style.display = quiz.hasPrevious() ? "inline" : "none";
+          });
+
+          // FIXME: Remove the forced new line and allow it to be done via CSS
+          options._container.appendChild( document.createTextNode( "\u00A0" ) );
+
+          continueButton = addButton( "continueButton", continueButtonText, function() {
+            if ( quiz.hasNext() ) {
+              quiz.next();
+              previousButton.style.display = "inline";
+            }
+            else {
+              quiz.end( options._container );
+              continueButton.style.display = "none";
+              previousButton.style.display = "none";
+            }
+          });
 
           continueButton.style.display = "inline";
           previousButton.style.display = "none";
