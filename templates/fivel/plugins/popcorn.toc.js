@@ -84,14 +84,29 @@
           //
           // FIXME: Checking if duration === 1 is an assumption.
           // If the duration is 1, then it's a quiz, so don't display the duration.
+          function formatTime(time) {
+            time = +time;
+            if ( time === 0 ) {
+              return "00";
+            }
+
+            if ( time < 10 ) {
+              return "0" + time;
+            }
+
+            return time;
+          }
+
+          duration = Math.floor( duration );
           if ( duration === 1 ) {
             duration = "";
           } else if ( duration < 60 ) {
-            duration = Math.floor( duration ) + "s";
+            duration = "00:" + formatTime(duration);
           } else {
-            seconds = duration % 60;
-            minutes = ( duration - seconds ) / 60;
-            duration = Math.floor( minutes ) + "m" + Math.floor( seconds ) + "s";
+            seconds = formatTime(duration % 60);
+            minutes = formatTime( ( duration - seconds ) / 60 );
+
+            duration = seconds + ":" + minutes;
           }
 
           a.innerHTML = section.title + "<span class=\"section-incomplete\">\u00A0\u00A0</span><span class=\"time-string\">" + duration + "</span> ";
