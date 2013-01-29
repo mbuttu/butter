@@ -11,11 +11,11 @@
   Popcorn.plugin( "quiz", function( options ) {
     function Quiz() {
       var currentIndex = 0,
-          that = this;
+          self = this;
 
       function decoratable( funcName ) {
         var result,
-        decorators = that.decoratorsList[ funcName ] || [],
+        decorators = self.decoratorsList[ funcName ] || [],
         args = Array.prototype.slice.call( arguments, 1 );
 
         for ( var idx = 0; idx < decorators.length; idx++ ) {
@@ -140,13 +140,50 @@
         // return questions[ currentIndex ];
       };
 
-      this.end = function( target ) {
-        var resumeButton = addButton( "resumeButton", "Finish", function() {
-          options._parentContainer.style.display = "none";
-          popcorn.play();
-        }),
+      this.review = function( target ) {
+        var reviewTextContainer = document.createElement( "div" ),
+            resumeButton = addButton( "resumeButton", "Submit", function() {
+              buttons.resumeButton.style.display = "none";
+              self.end( target );
+            });
 
-        resumeText = document.createElement( "p" );
+        if (paginated) {
+          showAll();
+        }
+
+        reviewTextContainer.id = "review-text-" + quizNumber;
+
+        reviewTextContainer.appendChild( document.createTextNode( "Please review your answers. Once you are done, click Submit to complete this quiz." ) );
+
+        // FIXME: Remove the breaks, allow it to be done via CSS
+        reviewTextContainer.appendChild( document.createElement( "br" ) );
+        reviewTextContainer.appendChild( document.createElement( "br" ) );
+
+        target.appendChild( reviewTextContainer );
+
+        target.appendChild( resumeButton );
+      };
+
+      this.end = function( target ) {
+        var resumeButton = addButton( "finishButton", "Finish", function() {
+              options._parentContainer.style.display = "none";
+              popcorn.play();
+            }),
+            resumeText = document.createElement( "p" ),
+            reviewTextContainer = document.getElementById( "review-text-" + quizNumber ),
+            radioButtons;
+
+        if (reviewTextContainer) {
+          reviewTextContainer.style.display = "none";
+        }
+
+        // Disable radio buttons
+        radioButtons = target.querySelectorAll( "input[type=radio]" );
+
+        for ( var idx = 0, length = radioButtons.length; idx < length; idx++ ) {
+          radioButtons[ idx ].disabled = true;
+        }
+
         resumeText.innerHTML = "Quiz is complete!";
 
         function checkAnswers() {
@@ -374,7 +411,7 @@
               previousButton.style.display = "inline";
             }
             else {
-              quiz.end( options._container );
+              quiz.review( options._container );
               continueButton.style.display = "none";
               previousButton.style.display = "none";
             }

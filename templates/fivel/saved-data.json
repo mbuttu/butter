@@ -47,7 +47,7 @@
                   "correctAnswer": 1,
                   "explanation": "This is definitely philosophical. That's why 2 is correct. Since 1 can't be 2 if the question is 2."
                 }],
-                "paginate": false,
+                "paginate": true,
                 "decorators": [{
                   "when": "end",
                   "what": "results"
@@ -87,28 +87,6 @@
                   }
                 ]
               }
-            }
-          ]
-        },
-        {
-          "name": "Layer1",
-          "id": "Layer1",
-          "trackEvents": [
-            {
-              "id": "TrackEvent1",
-              "type": "text",
-              "popcornOptions": {
-                "start": 1,
-                "end": 2,
-                "position": "bottom",
-                "alignment": "center",
-                "transition": "popcorn-fade",
-                "fontSize": "10%",
-                "text": "test",
-                "target": "video-container"
-              },
-              "track": "Layer1",
-              "name": "TrackEvent1"
             }
           ]
         }
