@@ -1,7 +1,6 @@
 /*global EditorHelper*/
 
 EditorHelper.addPlugin( "quiz", function( trackEvent ) {
-  debugger;
   var _container,
       _popcornOptions,
       target;

@@ -1,7 +1,6 @@
 /*global EditorHelper*/
 
 EditorHelper.addPlugin( "toc", function( trackEvent ) {
-  debugger;
   var _container,
       _popcornOptions,
       target;
