@@ -106,7 +106,7 @@
             seconds = formatTime(duration % 60);
             minutes = formatTime( ( duration - seconds ) / 60 );
 
-            duration = seconds + ":" + minutes;
+            duration = minutes + ":" + seconds;
           }
 
           a.innerHTML = section.title + "<span class=\"section-incomplete\">\u00A0\u00A0</span><span class=\"time-string\">" + duration + "</span> ";
