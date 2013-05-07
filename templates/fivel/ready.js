@@ -29,14 +29,14 @@
             });
           }
 
-          if ( trackEvent ) {
-            // hide the toc track event so that the editor can only be opened
-            // from the template
-            trackEvent.view.element.style.display = "none";
-            // hide the toc plugin from the plugin-list editor so that only one
-            // toc can be added to a project
-            tocPlugin.style.display = "none";
-          }
+          // if ( trackEvent ) {
+          //   // hide the toc track event so that the editor can only be opened
+          //   // from the template
+          //   trackEvent.view.element.style.display = "none";
+          //   // hide the toc plugin from the plugin-list editor so that only one
+          //   // toc can be added to a project
+          //   tocPlugin.style.display = "none";
+          // }
 
           var tocButton = document.getElementById( "opentoc" );
           tocButton.addEventListener( "click", function( e ) {
