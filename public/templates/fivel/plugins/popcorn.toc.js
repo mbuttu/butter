@@ -15,6 +15,7 @@
 
         options.popcorn = Popcorn( this.media );
         options._container = document.createElement( "div" );
+        options._target = target;
 
         if ( options.title ) {
           header = document.createElement( "div" ),

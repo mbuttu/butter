@@ -354,6 +354,7 @@
 
         options.decorators = options.decorators || [];
         options.title = options.title || "Quiz";
+        options._target = target;
 
         title.innerHTML = options.title;
 

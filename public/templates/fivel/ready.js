@@ -1,8 +1,10 @@
-(function ( Butter ){
+(function ( Butter, EditorHelper ){
   document.addEventListener( "DOMContentLoaded", function( e ){
     Butter.init({
       config: "config.json",
       ready: function( butter ){
+        EditorHelper.init( butter );
+
         butter.listen( "editoropened", function onEditorOpened() {
           butter.unlisten("editoropened", onEditorOpened);
           var trackEvent = butter.getTrackEventsByType( "toc" )[ 0 ],
@@ -66,4 +68,4 @@
       }
     });
   }, false );
-}( window.Butter ));
+}( window.Butter, window.EditorHelper ));
