@@ -11,13 +11,29 @@
     "slider": "{{baseDir}}templates/fivel/editors/slider-editor.js"
   },
   "plugin": {
-    "plugins": [],
-    "defaults" : [
-      "quiz",
-      "text",
-      "loop",
-      "slider",
-      "pausePlugin"
+    "plugins": [
+      {
+        "type": "text",
+        "icon": "{{baseDir}}templates/assets/plugins/text/text-icon.png"
+      },
+      {
+        "type": "pausePlugin",
+        "displayName": "Pause",
+        "icon": "{{baseDir}}templates/assets/plugins/pausePlugin/pause-icon.png"
+      },
+      {
+        "type": "loopPlugin",
+        "displayName": "loop",
+        "icon": "{{baseDir}}templates/assets/plugins/loopPlugin/loop-icon.png"
+      },
+      {
+        "type": "toc",
+        "displayName": "toc"
+      },
+      {
+        "type": "quiz",
+        "displayName": "quiz"
+      }
     ]
   },
   "maxPluginZIndex": 1000
