@@ -140,7 +140,7 @@
 
         _targets = _this.createTargetsList( [ butter.currentMedia ].concat( butter.targets ) );
         _trackEvent = trackEvent;
-        _trackEvent.view.element.style.display = "none";
+        // _trackEvent.view.element.style.display = "none";
         _popcornOptions = _trackEvent.popcornOptions;
         _this.applyExtraHeadTags( compiledLayout );
         onEditorOpen();

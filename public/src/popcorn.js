@@ -30,6 +30,9 @@ requirejs.config({
     "popcorn.text": "../templates/assets/plugins/text/popcorn.text",
     "popcorn.twitter": "../templates/assets/plugins/twitter/popcorn.twitter",
     "popcorn.wikipedia": "../templates/assets/plugins/wikipedia/popcorn.wikipedia",
+    "popcorn.quiz": "../templates/fivel/plugins/popcorn.quiz",
+    "popcorn.toc": "../templates/fivel/plugins/popcorn.toc",
+    "popcorn.slider": "../templates/fivel/plugins/slider/popcorn.slider",
 
     // RequireJS
     "text": "../external/require/text"
@@ -63,7 +66,10 @@ requirejs.config({
     "popcorn.skip": [ "popcorn.core" ],
     "popcorn.text": [ "popcorn.core" ],
     "popcorn.twitter": [ "popcorn.core" ],
-    "popcorn.wikipedia": [ "popcorn.core" ]
+    "popcorn.wikipedia": [ "popcorn.core" ],
+    "popcorn.quiz": [ "popcorn.core" ],
+    "popcorn.toc": [ "popcorn.core" ],
+    "popcorn.slider": [ "popcorn.core" ]
   }
 });
 
@@ -83,6 +89,9 @@ define([
   "popcorn.text",
   "popcorn.twitter",
   "popcorn.wikipedia",
+  "popcorn.quiz",
+  "popcorn.toc",
+  "popcorn.slider",
   "popcorn.HTMLMediaElement",
   "popcorn.HTMLNullVideoElement",
   "popcorn.HTMLSoundCloudAudioElement",
