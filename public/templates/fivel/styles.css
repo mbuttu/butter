@@ -1,3 +1,9 @@
+.popcorn-sequencer {
+  /* Override the hardcoded inline value of 998 for the sequencer. */
+  /* We need to override this so that the quiz will show. */
+  z-index: 0 !important;
+}
+
 #template-container {
   width: 1000px;
   border: 1px solid black;
