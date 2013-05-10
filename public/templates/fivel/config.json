@@ -14,25 +14,36 @@
     "plugins": [
       {
         "type": "text",
-        "icon": "{{baseDir}}templates/assets/plugins/text/text-icon.png"
+        "icon": "{{baseDir}}templates/assets/plugins/text/text-icon.png",
+        "path": "{{baseDir}}templates/assets/plugins/text/popcorn.text.js"
       },
       {
         "type": "pausePlugin",
         "displayName": "Pause",
-        "icon": "{{baseDir}}templates/assets/plugins/pausePlugin/pause-icon.png"
+        "icon": "{{baseDir}}templates/assets/plugins/pausePlugin/pause-icon.png",
+        "path": "{{baseDir}}templates/assets/plugins/pausePlugin/popcorn.pausePlugin.js"
       },
       {
         "type": "loopPlugin",
         "displayName": "loop",
-        "icon": "{{baseDir}}templates/assets/plugins/loopPlugin/loop-icon.png"
+        "icon": "{{baseDir}}templates/assets/plugins/loopPlugin/loop-icon.png",
+        "path": "{{baseDir}}templates/assets/plugins/loopPlugin/popcorn.loopPlugin.js"
       },
       {
         "type": "toc",
-        "displayName": "toc"
+        "hidden": "true",
+        "displayName": "toc",
+        "path": "{{baseDir}}templates/fivel/plugins/popcorn.toc"
       },
       {
         "type": "quiz",
-        "displayName": "quiz"
+        "displayName": "quiz",
+        "path": "{{baseDir}}templates/fivel/plugins/popcorn.quiz.js"
+      },
+      {
+        "type": "slider",
+        "displayName": "slider",
+        "path": "{{baseDir}}templates/fivel/plugins/slider/popcorn.slider.js"
       }
     ]
   },
