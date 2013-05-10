@@ -25,14 +25,14 @@ var express = require('express'),
 var templateConfigs = {};
 
 function readTemplateConfig( templateName, templatedPath ) {
-  var configPath = templatedPath.replace( '{{templateBase}}', config.dirs.templates + '/' );
+  var configPath = templatedPath.replace( '{{templateBase}}', config.dirs.templates + path.sep );
   // Resolve paths relative to server.js, not the cwd
   configPath = path.resolve( __dirname, configPath );
 
   fs.readFile( configPath, 'utf8', function( err, conf ) {
-    var configPathBase = configPath.substring( 0, configPath.lastIndexOf( '/' ) );
+    var configPathBase = configPath.substring( 0, configPath.lastIndexOf( path.sep ) );
     conf = JSON.parse( conf );
-    conf.template = configPathBase + '/' + conf.template;
+    conf.template = configPathBase + path.sep + conf.template;
     templateConfigs[ templateName ] = conf;
   });
 }
@@ -214,8 +214,8 @@ app.post( '/api/publish/:id',
           numSources,
           j, k, len;
 
-      templateURL = templateFile.substring( templateFile.indexOf( '/templates' ), templateFile.lastIndexOf( '/' ) );
-      baseHref = APP_HOSTNAME + templateURL + "/";
+      templateURL = templateFile.substring( templateFile.indexOf( path.sep + 'templates' ), templateFile.lastIndexOf( path.sep ) );
+      baseHref = APP_HOSTNAME + templateURL + path.sep;
       baseString = '\n  <base href="' + baseHref + '"/>';
 
       // look for script and link tags with data-butter-exclude in particular (e.g. butter's js script)
@@ -233,7 +233,7 @@ app.post( '/api/publish/:id',
       if ( templateConfig.plugin && templateConfig.plugin.plugins ) {
         var plugins = templateConfig.plugin.plugins;
         for ( i = 0, len = plugins.length; i < len; i++ ) {
-          externalAssetURL = utils.pathToURL( APP_HOSTNAME + '/' + plugins[ i ].path.split( '{{baseDir}}' ).pop() );
+          externalAssetURL = utils.pathToURL( APP_HOSTNAME + path.sep + plugins[ i ].path.split( '{{baseDir}}' ).pop() );
           externalAssetsString += '\n  <script src="' + externalAssetURL + '"></script>';
         }
         externalAssetsString += '\n';
