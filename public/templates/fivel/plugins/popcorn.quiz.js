@@ -345,7 +345,7 @@
     }
 
     return {
-      _setup: function() {
+      _setup: function( popcornOptions ) {
         var target = document.getElementById( options.target ),
             title = document.createElement( "div" );
 
@@ -393,6 +393,13 @@
         //   throw new Error( "a quiz needs a question and possible answers" );
         // }
         target && target.appendChild( options._parentContainer );
+
+        // Can't pass in options to _setup since that will shadow the options
+        // defined and needed earlier in the file
+        //
+        // This can be removed if the structure of how this plugin is written is refactored.
+        popcornOptions._target = target;
+        popcornOptions._container = options._container;
       },
       start: function( event ) {
         function toggleButtons() {
