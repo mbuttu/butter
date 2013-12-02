@@ -43,7 +43,8 @@
       {
         "type": "slider",
         "displayName": "slider",
-        "path": "{{baseDir}}templates/fivel/plugins/slider/popcorn.slider.js"
+        "path": "{{baseDir}}templates/fivel/plugins/slider/popcorn.slider.js",
+        "icon": "{{baseDir}}templates/fivel/plugins/slider/slideout.png"
       }
     ]
   },
