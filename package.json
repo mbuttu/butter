@@ -95,6 +95,7 @@
     "newrelic": "0.9.20",
     "node-uuid": "1.4.0",
     "requirejs-middleware": "0.0.5",
+    "webmaker-mediasync": "https://github.com/mozilla/webmaker-mediasync/tarball/v0.1.23",
     "sequelize": "1.5.0",
     "shelljs": "0.1.2"
   },
