@@ -195,6 +195,10 @@ define( [ "core/trackevent", "core/track", "core/eventmanager",
     butter.listen( "editoropened", onEditorToggled );
     _media.listen( "mediacontentchanged", _timebar.disable );
 
+    function addCallback( trackEvent ) {
+      butter.editor.editTrackEvent( trackEvent );
+    }
+
     function onPluginDropped( e ) {
       var type = e.data.type,
           track = e.data.track,
@@ -218,8 +222,11 @@ define( [ "core/trackevent", "core/track", "core/eventmanager",
         if ( popcornOptions && popcornOptions.end ) {
           popcornOptions.end = popcornOptions.end + start;
         }
-        trackEvent = butter.generateSafeTrackEvent( type, popcornOptions, track );
-        butter.editor.editTrackEvent( trackEvent );
+        butter.generateSafeTrackEvent({
+          type: type,
+          popcornOptions: popcornOptions,
+          track: track
+        }, addCallback );
       }
     }
 
