@@ -41,10 +41,6 @@
     height = ( height / targetHeight ) * 100;
     width = ( width / targetWidth ) * 100;
 
-    if ( options.end ) {
-      options.end();
-    }
-
     // Enforce container size here, instead of relying on the update.
     container.style.width = width + "%";
     container.style.height = height + "%";
