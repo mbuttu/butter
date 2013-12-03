@@ -1,7 +1,6 @@
+/*global Butter*/
 (function( global, $ ) {
-  var plugins = {},
-      MAX_IMAGE_WIDTH = 1280,
-      MAX_IMAGE_HEIGHT = 740;
+  var plugins = {};
 
   var EditorHelper = function() {
     throw "Do not use EditorHelper in this manner. Use EditorHelper.init instead.";
@@ -16,9 +15,8 @@
 
   function calculateFinalPositions( event, ui, trackEvent, targetContainer, container, options ) {
     var target = targetContainer.getBoundingClientRect(),
-        cont = container.getBoundingClientRect(),
-        height = cont.height,
-        width = cont.width,
+        height = container.clientHeight,
+        width = container.clientWidth,
         top = ui.position.top,
         left = ui.position.left,
         targetHeight = target.height,
@@ -42,6 +40,10 @@
 
     height = ( height / targetHeight ) * 100;
     width = ( width / targetWidth ) * 100;
+
+    if ( options.end ) {
+      options.end();
+    }
 
     // Enforce container size here, instead of relying on the update.
     container.style.width = width + "%";
@@ -88,18 +90,72 @@
 
       options = options || {};
 
-      function createHelper( suffix ) {
-        var el = document.createElement( "div" );
-        el.classList.add( "ui-draggable-handle" );
-        el.classList.add( "ui-draggable-" + suffix );
-        return el;
+      var el = document.createElement( "div" ),
+          stopPropagation = false,
+          onBlur,
+          onStopPropagation,
+          onMouseDown,
+          onMouseUp,
+          onDblClick,
+          tooltipElement;
+
+      if ( !options.disableTooltip ) {
+        tooltipElement = document.createElement( "div" );
+        tooltipElement.innerHTML = options.tooltip || "Double click to edit";
+        tooltipElement.classList.add( "butter-tooltip" );
+        tooltipElement.classList.add( "butter-tooltip-middle" );
+        dragContainer.appendChild( tooltipElement );
+        tooltipElement.style.marginTop = "-" + ( tooltipElement.offsetHeight / 2 ) + "px";
       }
 
-      dragContainer.appendChild( createHelper( "top" ) );
-      dragContainer.appendChild( createHelper( "bottom" ) );
-      dragContainer.appendChild( createHelper( "left" ) );
-      dragContainer.appendChild( createHelper( "right" ) );
-      dragContainer.appendChild( createHelper( "grip" ) );
+      onBlur = function() {
+        if ( stopPropagation ) {
+          stopPropagation = false;
+          return;
+        }
+        if ( tooltipElement ) {
+          tooltipElement.classList.remove( "tooltip-off" );
+        }
+        dragContainer.removeEventListener( "mousedown", onStopPropagation, false );
+        el.addEventListener( "dblclick", onDblClick, false );
+        document.removeEventListener( "mousedown", onBlur, false );
+        el.style.display = "";
+        dragContainer.classList.remove( "track-event-editing" );
+      };
+      onStopPropagation = function() {
+        stopPropagation = true;
+      };
+      onDblClick = function() {
+        if ( tooltipElement ) {
+          tooltipElement.classList.add( "tooltip-off" );
+        }
+        dragContainer.addEventListener( "mousedown", onStopPropagation, false );
+        el.removeEventListener( "dblclick", onDblClick, false );
+        document.addEventListener( "mousedown", onBlur, false );
+        el.style.display = "none";
+        dragContainer.classList.add( "track-event-editing" );
+      };
+      el.classList.add( "ui-draggable-handle" );
+      if ( options.editable !== false ) {
+        el.addEventListener( "dblclick", onDblClick, false );
+      }
+
+      dragContainer.appendChild( el );
+
+      onMouseDown = function() {
+        document.addEventListener( "mouseup", onMouseUp, false );
+        el.removeEventListener( "mouseup", onMouseDown, false );
+        dragContainer.style.overflow = "hidden";
+      };
+
+      onMouseUp = function() {
+        document.removeEventListener( "mouseup", onMouseUp, false );
+        el.addEventListener( "mouseup", onMouseDown, false );
+        dragContainer.style.overflow = "";
+      };
+
+      // This ensures the height of the element is not increased
+      el.addEventListener( "mousedown", onMouseDown, false );
 
       $( dragContainer ).draggable({
         handle: ".ui-draggable-handle",
@@ -120,6 +176,10 @@
           calculateFinalPositions( event, ui, trackEvent, targetContainer, dragContainer, options );
         }
       });
+
+      return {
+        edit: onDblClick
+      };
     };
 
     /**
@@ -145,7 +205,28 @@
         return;
       }
 
-      var iframeCover = targetContainer.querySelector( ".butter-iframe-fix" );
+      var iframeCover = targetContainer.querySelector( ".butter-iframe-fix" ),
+          handlePositions = options.handlePositions;
+
+      function createHelper( suffix ) {
+        var el = document.createElement( "div" );
+        el.classList.add( "ui-resizable-handle" );
+        el.classList.add( "ui-resizable-" + suffix );
+        return el;
+      }
+
+      if ( handlePositions.search( /\bn\b/ ) > -1 ) {
+        resizeContainer.appendChild( createHelper( "top" ) );
+      }
+      if ( handlePositions.search( /\bs\b/ ) > -1 ) {
+        resizeContainer.appendChild( createHelper( "bottom" ) );
+      }
+      if ( handlePositions.search( /\bw\b/ ) > -1 ) {
+        resizeContainer.appendChild( createHelper( "left" ) );
+      }
+      if ( handlePositions.search( /\be\b/ ) > -1 ) {
+        resizeContainer.appendChild( createHelper( "right" ) );
+      }
 
       options = options || {};
 
@@ -239,12 +320,6 @@
       }
     };
 
-    var mimeTypeMapping = {
-      "image/gif": "image/png",
-      "image/jpeg": "image/jpeg",
-      "image/png": "image/png"
-    };
-
     /**
      * Member: droppable
      *
@@ -254,7 +329,7 @@
      * @param {DOMElement} dropContainer: The container that listens for the drop events
      */
 
-    global.EditorHelper.droppable = function( trackEvent, dropContainer, callback ) {
+    global.EditorHelper.droppable = function( trackEvent, dropContainer ) {
       dropContainer.addEventListener( "dragover", function( e ) {
         e.preventDefault();
         dropContainer.classList.add( "butter-dragover" );
@@ -271,7 +346,7 @@
       }, false );
 
       dropContainer.addEventListener( "drop", function( e ) {
-        var file, imgSrc, imgURI, image, div;
+        var file, fd;
 
         e.preventDefault();
         e.stopPropagation();
@@ -284,107 +359,26 @@
         }
 
         file = e.dataTransfer.files[ 0 ];
+        fd = new FormData();
+        fd.append( "image", file );
 
-        // If we can't reasonably convert whatever they're dropping on us then bail
-        var exportAs = mimeTypeMapping[ file.type ];
-        if ( !exportAs ) {
-          butter.dispatch( "filetype-unsupported" );
-          return;
-        }
 
-        if ( window.URL && window.URL.createObjectURL ) {
-          imgSrc = window.URL.createObjectURL( file );
-        } else if ( window.webkitURL && window.webkitURL.createObjectURL ) {
-          imgSrc = window.webkitURL.createObjectURL( file );
-        } else {
-          butter.dispatch( "droppable-unsupported" );
-        }
-
-        // So yeah, Opera has the functionality namespaced but all it currently does is:
-        // window.URL.createObjectURL = function(obj) {
-        //   return obj;
-        // };
-        if ( imgSrc === file ) {
-          butter.dispatch( "droppable-unsupported" );
-          return;
-        } else {
-
-          image = document.createElement( "img" );
-          image.onload = function() {
-            var width = this.width,
-                height = this.height,
-                wRatio, hRatio, resizeRatio,
-                scaledWidth, scaledHeight,
-                canvas = document.createElement( "canvas" ),
-                context;
-
-            // Fit image nicely into our largest embed size, using
-            // the longest side and aspect ratio. Inspired by:
-            // http://stackoverflow.com/questions/7863653/algorithm-to-resize-image-and-maintain-aspect-ratio-to-fit-iphone
-            if ( width >= height ) {
-              if ( width <= MAX_IMAGE_WIDTH && height <= MAX_IMAGE_HEIGHT ) {
-                scaledWidth = width;
-                scaledHeight = height;
-              } else {
-                wRatio = MAX_IMAGE_WIDTH / width;
-                hRatio = MAX_IMAGE_HEIGHT / height;
-                resizeRatio = Math.min( wRatio, hRatio );
-                scaledHeight = height * resizeRatio;
-                scaledWidth = width * resizeRatio;
+        require( [ "util/xhr" ], function( XHR ) {
+          XHR.put( "/api/image", fd, function( data ) {
+            if ( !data.error ) {
+              if ( trackEvent ) {
+                trackEvent.update( { src: data.url } );
               }
+
+              butter.dispatch( "droppable-succeeded", data.url );
             } else {
-              if ( height <= MAX_IMAGE_WIDTH && width <= MAX_IMAGE_HEIGHT ) {
-                scaledWidth = width;
-                scaledHeight = height;
-              } else {
-                wRatio = MAX_IMAGE_HEIGHT / width;
-                hRatio = MAX_IMAGE_WIDTH / height;
-                resizeRatio = Math.min( wRatio, hRatio );
-                scaledHeight = height * resizeRatio;
-                scaledWidth = width * resizeRatio;
-              }
+              butter.dispatch( "droppable-upload-failed", data.error );
             }
+          });
+        });
 
-            canvas.width = scaledWidth;
-            canvas.height = scaledHeight;
-            context = canvas.getContext( "2d" );
-            context.drawImage( this, 0, 0, scaledWidth, scaledHeight );
-
-            imgURI = canvas.toDataURL( exportAs );
-
-            // If the browser's canvas impl. doesn't support whatever we requested then bail
-            if ( imgURI.indexOf( exportAs ) === -1 ) {
-              butter.dispatch( "droppable-unsupported" );
-              return;
-            }
-
-            if ( trackEvent ) {
-              trackEvent.update( { src: imgURI } );
-            } else {
-              callback( imgURI );
-            }
-
-            if ( window.URL && window.URL.revokeObjectURL ) {
-              window.URL.revokeObjectURL( imgSrc );
-            } else if ( window.webkitURL && window.webkitURL.revokeObjectURL ) {
-              window.webkitURL.revokeObjectURL( imgSrc );
-            }
-          };
-          image.src = imgSrc;
-
-          if ( trackEvent ) {
-            butter.editor.editTrackEvent( trackEvent );
-          }
-
-          // Force image to download, esp. Opera. We can't use
-          // "display: none", since that makes it invisible, and
-          // thus not load.  Opera also requires the image be
-          // in the DOM before it will load.
-          div = document.createElement( "div" );
-          div.setAttribute( "data-butter-exclude", "true" );
-          div.className = "butter-image-preload";
-          div.appendChild( image );
-          document.body.appendChild( div );
+        if ( trackEvent ) {
+          butter.editor.editTrackEvent( trackEvent );
         }
       }, false );
     };
