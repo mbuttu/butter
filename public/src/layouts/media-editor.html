@@ -1,8 +1,12 @@
-<div class="media-editor butter-editor fadable alternates-hidden allow-scrollbar">
+<div class="media-editor butter-editor fadable alternates-hidden allow-scrollbar no-paging">
   <h1 class="add-new-media">Create new media clip</h1>
-  <div class="butter-editor-body">
+  <ul class="butter-editor-tabs">
+    <li><a class="butter-btn project-tab butter-active">My Media</a></li>
+    <li><a class="butter-btn search-tab">Search for Media</a></li>
+  </ul>
+  <div class="butter-editor-body butter-tabs-spacing">
     <fieldset class="add-media-panel">
-      <div class="media-editor-inner-wrapper primary-media-wrapper">
+      <div class="media-editor-inner-wrapper primary-media-wrapper project-clips">
         <p>
           <span class="fl-right">
             <span class="media-icon youtube-icon"></span>
@@ -13,39 +17,69 @@
           Paste a link from YouTube, SoundCloud, Vimeo or an HTML5 video
         </p>
         <textarea class="add-media-input" placeholder="Paste an HTML5, YouTube, Vimeo, or SoundCloud link here"></textarea>
-        <span class="butter-btn-slide-out">
-          <a class="add-media-btn butter-btn btn-green hidden">Create clip</a>
-          <span class="media-loading-spinner butter-spinner hidden" ></span>
-          <label class="media-error-message hidden"></label>
-        </span>
       </div>
+      <div class="media-editor-inner-wrapper primary-media-wrapper search-items butter-hidden">
+        <p>
+          <span class="fl-right">
+            <span class="media-icon youtube-icon"></span>
+            <img class="media-icon" alt="image icon" src="/resources/icons/giphy.png">
+          </span>
+          Search for items on the web to add to your project.
+        </p>
+        <span>Search for items from: </span>
+        <select>
+          <option value="YouTube" id="select-youtube">YouTube</option>
+          <option value="Giphy" id="select-giphy">Giphy</option>
+        </select>
+        <textarea class="search-media-input" placeholder="Type what you want to search for here"></textarea>
+      </div>
+      <span class="butter-btn-slide-out">
+        <a class="add-media-btn butter-btn btn-green hidden">Create Clip</a>
+        <span class="media-loading-spinner butter-spinner hidden" ></span>
+        <label class="media-error-message hidden"></label>
+      </span>
     </fieldset>
 
     <div class="media-gallery">
-      <div class="media-gallery-heading">
-        Media Gallery
-      </div>
+      <div class="media-gallery-heading">My Media Gallery</div>
       <div class="media-gallery-scroll-container scrollbar-container">
-        <ul class="media-gallery-list scrollbar-outer scrollbar-inner"></ul>
+        <div class="scrollbar-outer scrollbar-inner">
+          <ul class="media-gallery-list" id="project-items" data-page="1"></ul>
+          <ul class="media-gallery-list" id="youtube-items" data-page="1"></ul>
+          <ul class="media-gallery-list" id="giphy-items" data-page="1"></ul>
+        </div>
       </div>
     </div>
 
     <fieldset class="media-gallery-base-media butter-form-inline form-single bottom">
-      <label>Duration</label>
-      <input type="text" class="media-base-duration" value="">
+      <div class="paging-container">
+        <ul></ul>
+      </div>
     </fieldset>
 
   </div>
 </div>
 
-<!-- This is added to media-gallery for each new media item -->
-<li class="media-gallery-item">
-  <div class="mg-thumbnail"></div>
+<!-- This is used for photo based media items -->
+<li class="media-gallery-item gallery-item-grid gallery-photo">
+  <div class="mg-thumbnail"><span class="icon-plus hidden"></span></div>
   <div class="mg-meta-data">
     <div class="mg-title"></div>
-    <div class="mg-type media-icon"><span class="mg-type-text"></span></div>
+    <div class="mg-type">
+      <img class="media-icon" alt="image icon">
+      <span class="mg-type-text photo"></span>
+    </div>
+  </div>
+  <span class="mg-delete-btn icon icon-trash"></span>
+</li>
+
+<!-- This is added to media-gallery for each new media item -->
+<li class="media-gallery-item gallery-video">
+  <div class="mg-thumbnail"><span class="icon-plus hidden"></span></div>
+  <div class="mg-meta-data">
+    <div class="mg-title"></div>
+    <div class="mg-type media-icon"><span class="mg-type-text media"></span></div>
     <div class="mg-duration"></div>
-    <div class="mg-error"></div>
   </div>
   <span class="mg-delete-btn icon icon-trash"></span>
 </li>
