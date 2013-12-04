@@ -8,7 +8,8 @@
     "quiz": "{{baseDir}}templates/fivel/editors/quiz-editor.js",
     "text": "{{baseDir}}templates/assets/editors/text/text-editor.js",
     "toc": "{{baseDir}}templates/fivel/editors/toc-editor.js",
-    "slider": "{{baseDir}}templates/fivel/editors/slider-editor.js"
+    "slider": "{{baseDir}}templates/fivel/editors/slider-editor.js",
+    "interaction": "{{baseDir}}templates/fivel/editors/interaction-editor.js"
   },
   "plugin": {
     "plugins": [
@@ -39,6 +40,10 @@
         "type": "quiz",
         "displayName": "quiz",
         "path": "{{baseDir}}templates/fivel/plugins/popcorn.quiz.js"
+      },
+      {
+        "type": "interaction",
+        "icon": "{{baseDir}}templates/fivel/plugins/interaction/interaction-icon.png"
       },
       {
         "type": "slider",
