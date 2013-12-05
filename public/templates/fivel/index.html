@@ -8,6 +8,13 @@
 
   <meta name="viewport" content="width=device-width">
 
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+    }
+  </style>
+
   <link rel="stylesheet" href="../assets/css/jquery-ui/jquery.ui.butter.css" data-butter-exclude>
 
   <link rel="stylesheet" href="../../../css/transitions.css">
@@ -30,18 +37,50 @@
   <script src="editors/hotspot.js" data-butter-exclude></script>
   <script type="text/javascript" src="ready.js" data-butter-exclude></script>
 
-  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="player.css" />
+  <link rel="stylesheet" href="controls.css" />
 
 </head>
 <body class="embed">
-  <div id="template-container">
-    <div data-butter="target" id="toc"></div>
-    <div id="video-container" data-butter="target" data-butter-default>
-      <div id="video" data-butter="media" data-butter-media-control="true"></div>
+  <div id="content">
+    <div id="template-container">
+      <div data-butter="target" id="toc" class="normal-screen">
+        <div id="coursename"><span>[[Course Name]]</span></div>
+      </div>
+      <div data-butter="target" data-butter-default id="video-container" class="normal-screen">
+        <div data-butter="media" data-butter-media-control="true" id="video"></div>
+        <div id="resumeDiv">[[Quiz HTML]]</div>
+      </div>
+      <div class="loading-message"></div>
     </div>
-    <div data-butter="target" id="quiz-container"></div>
-    <div class="loading-message"></div>
+    <div id="videoPlayerContainer">
+      <div id="playerControls">
+        <div id="playerPlayPauseButton" class="paused"></div>
+        <div class="playerDivLine"></div>
+        <div id="playerTitle"><span id="playerTitleText"></span></div>
+        <div class="playerDivLine"></div>
+        <div id="playerTime"><span id="playerTimeText" class="player-time">00:00</span></div>
+        <div id="playerProgressBar">
+          <div id="playerProgressBase">
+            <div id="playerProgressTime"></div>
+          </div>
+        </div>
+        <div id="playerDuration"><span id="playerDurationText" class="player-time">00:00</span></div>
+        <div class="playerDivLine"></div>
+        <div id="playerFullscreen" class="normal-screen"></div>
+        <div class="playerDivLine"></div>
+        <div id="playerCloseCaption" class="cc-off"></div>
+        <div class="playerDivLine"></div>
+        <div id="playerVolumeButton" class="unmuted"></div>
+        <div id="playerVolumeBar">
+          <div id="playerVolumeBase">
+            <div id="playerVolumeLevel"></div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
+
   <button id="opentoc" data-butter-exclude>Open TOC Editor</button>
   <button id="export" data-butter-exclude>Export</button>
 </body>
