@@ -1,3 +1,5 @@
+/*global $*/
+
 (function ( Butter, EditorHelper ){
   document.addEventListener( "DOMContentLoaded", function( e ){
     Butter.init({
@@ -64,7 +66,80 @@
               }
             }).open();
           });
-      });
+        });
+
+        require(["/templates/fivel/quiz.js", "/templates/fivel/controls.js"], function(Quiz, Controls) {
+          var popcorn = butter.currentMedia.popcorn.popcorn;
+          //var popcorn = !{popcorn}
+          var controls = new Controls(popcorn, "[[Course Name]]", "video-container");
+
+          $("#video").bind("contextmenu", function(){
+            return false;
+          });
+
+          popcorn.on("loadedmetadata", function() {
+            $("#resumeDiv").show();
+          });
+
+          $("#playerCloseCaption").click(function() {
+            popcorn.toggle("text");
+          });
+
+          $("#resumeDiv").click(function() {
+            popcorn.play();
+            $("#resumeDiv").hide();
+          });
+
+          popcorn.on('seeked', function() {
+            $("#resumeDiv").hide();
+          });
+
+          popcorn.on('seeking', function() {
+            $("#resumeDiv").hide();
+          });
+
+          popcorn.on("playing", function() {
+            $("#resumeDiv").hide();
+          });
+
+          popcorn.on("play", function() {
+            $("#resumeDiv").hide();
+          });
+
+          popcorn.on("pause", function() {
+            $("#resumeDiv").show();
+          });
+
+          if ("#{course._id}".length > 0) {
+            var quiz = new Quiz();
+
+            popcorn.on("loadedmetadata", function() {
+              popcorn.code({
+                start: popcorn.duration(),
+                end: popcorn.duration() + 1,
+                onStart: function() {
+                  quiz.show();
+                },
+                onEnd: function() {
+                  quiz.hide();
+                }
+              });
+            });
+
+            quiz.prepare();
+            quiz.start();
+
+            quiz.on("submission", function(submission) {
+              $.post("/course/quizcomplete", {
+                courseId: "#{course._id}",
+                submission: submission
+              })
+              .done(function(results) {
+                quiz.showResults(results);
+              });
+            });
+          }
+        });
       }
     });
   }, false );

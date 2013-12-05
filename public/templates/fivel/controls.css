@@ -1,0 +1,248 @@
+/***********************************
+        VIDEO STYLES
+***********************************/
+
+#videoPlayerContainer
+{
+  position: relative;
+  width: 1000px;
+  margin-left: 12px;
+  margin-bottom: 30px;
+}
+
+#playerControls
+{
+  background-image: url('/images/playerbar-background.png');
+  width: 100%;
+  height: 21px;
+}
+
+#playerControls div
+{
+  height: 21px;
+}
+.playerDivLine
+{
+  height:21px;
+  display: inline-block;
+  width: 1px;
+  background: url("/images/playerbar-divline.png");
+}
+
+#playerPlayPauseButton
+{
+  display: inline-block;
+  cursor: pointer;
+  height: 21px;
+  width: 35px;
+}
+
+#playerPlayPauseButton.paused
+{
+  background-image: url( "/images/playerbar-play.png" );
+}
+
+#playerPlayPauseButton.playing
+{
+  background-image: url( "/images/playerbar-pause.png" );
+}
+
+#playerPlayPauseButton.paused:hover
+{
+  background-image: url( "/images/playerbar-play-over.png" );
+}
+
+#playerPlayPauseButton.playing:hover
+{
+  background-image: url( "/images/playerbar-pause-over.png" );
+}
+
+#playerTitle
+{
+  display: inline-block;
+  margin: 0px 8px;
+  overflow: hidden;
+  cursor: default;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  color: #000;
+}
+
+#playerTitleText
+{
+  font-size: 12px;
+  padding-top: 3px;
+  display: table-cell;
+}
+
+#playerTime
+{
+  display: inline-block;
+  margin: 0 8px;
+  cursor: default;
+}
+
+.player-time
+{
+  display: table-cell;
+  vertical-align: middle;
+  text-align: center;
+  font-size: 10px;
+  font-family: Verdana;
+  color: #000;
+  padding-top: 3px;
+}
+
+#playerProgressBar
+{
+  display: inline-block;
+  margin: 0;
+  padding: 0;
+  height: 21px;
+  cursor: pointer;
+}
+
+#playerProgressBase
+{
+  margin-top: 5px;
+  height: 9px !important;
+  background-color: #333;
+}
+
+#playerProgressTime
+{
+  width: 0px;
+  height: 9px !important;
+  background-color: #900;
+}
+
+#playerDuration
+{
+  display: inline-block;
+  margin-left: 8px;
+  padding-right:8px;
+  cursor: default;
+}
+
+#playerFullscreen
+{
+  display: inline-block;
+  cursor: pointer;
+  height: 21px;
+  width: 35px;
+}
+
+#playerFullscreen.normal-screen
+{
+  background-image: url( "/images/playerbar-fullscreen.png" );
+}
+
+#playerFullscreen.full-screen
+{
+  background-image: url( "/images/playerbar-minimize.png" );
+}
+
+#playerFullscreen.normal-screen:hover
+{
+  background-image: url( "/images/playerbar-fullscreen-over.png" );
+}
+
+#playerFullscreen.full-screen:hover
+{
+  background-image: url( "/images/playerbar-minimize-over.png" );
+}
+
+
+#playerCloseCaption
+{
+  display: inline-block;
+  cursor: pointer;
+  height: 21px;
+  width: 35px;
+}
+
+#playerCloseCaption.cc-off
+{
+  background-image: url( "/images/playerbar-captioning-off.png" );
+}
+
+#playerCloseCaption.cc-on
+{
+  background-image: url( "/images/playerbar-captioning-on.png" );
+}
+
+#playerCloseCaption.cc-off:hover
+{
+  background-image: url( "/images/playerbar-captioning-over.png" );
+}
+
+#playerCloseCaption.cc-on:hover
+{
+  background-image: url( "/images/playerbar-captioning-over.png" );
+}
+
+#playerVolumeButton
+{
+  display: inline-block;
+  cursor: pointer;
+  height: 21px;
+  width: 35px;
+}
+
+#playerVolumeButton.unmuted
+{
+  background-image: url( "/images/playerbar-volume-on.png" );
+}
+
+#playerVolumeButton.muted
+{
+  background-image: url( "/images/playerbar-volume-off.png" );
+}
+
+#playerVolumeButton.unmuted:hover
+{
+  background-image: url( "/images/playerbar-volume-on-over.png" );
+}
+
+#playerVolumeButton.muted:hover
+{
+  background-image: url( "/images/playerbar-volume-off-over.png" );
+}
+
+#playerVolumeBar
+{
+  display: inline-block;
+  margin: 0px;
+  padding: 0px;
+  cursor: pointer;
+}
+
+#playerVolumeBase
+{
+  margin-top: 6px;
+  margin-left: 3px;
+  height: 9px !important;
+  background-color: #333;
+}
+
+#playerVolumeLevel
+{
+  width: 20px;
+  height: 9px !important;
+  background-color: #900;
+}
+
+#captions
+{
+  position: absolute;
+  bottom: 30px;
+  color: #FFF;
+  font-size: 14px; /*background-color:rgba(0, 0, 0, .5);*/
+}
+
+#captions p
+{
+  text-align: center;
+  line-height: normal;
+  padding: 0px 10px;
+}

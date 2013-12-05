@@ -6,11 +6,6 @@
       "element": "video-container"
     },
     {
-      "id": "Target1",
-      "name": "Target1",
-      "element": "quiz-container"
-    },
-    {
       "id": "Target2",
       "name": "Target2",
       "element": "toc"
@@ -29,34 +24,6 @@
           "name": "Layer0",
           "id": "Layer0",
           "trackEvents": [
-            {
-              "id": "TrackEvent0",
-              "type": "quiz",
-              "popcornOptions": {
-                "title": "Quiz",
-                "start": 5,
-                "end": 6,
-                "questions": [{
-                  "question": "Does HTML5 work in IE8?",
-                  "answers": [ "Yes", "No" ],
-                  "correctAnswer": 1
-                },
-                {
-                  "question": "Question 2",
-                  "answers": [ "1", "2" ],
-                  "correctAnswer": 1,
-                  "explanation": "This is definitely philosophical. That's why 2 is correct. Since 1 can't be 2 if the question is 2."
-                }],
-                "paginate": true,
-                "decorators": [{
-                  "when": "end",
-                  "what": "results"
-                }],
-                "target": "video-container"
-              },
-              "track": "Layer0",
-              "name": "TrackEvent0"
-            },
             {
               "id": "TrackEvent2",
               "type": "toc",
