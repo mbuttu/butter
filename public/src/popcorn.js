@@ -35,6 +35,7 @@ requirejs.config({
     "popcorn.toc": "../templates/fivel/plugins/popcorn.toc",
     "popcorn.slider": "../templates/fivel/plugins/slider/popcorn.slider",
     "popcorn.hotspot": "../templates/fivel/plugins/hotspot/popcorn.hotspot",
+    "popcorn.interaction": "../templates/fivel/plugins/interaction/popcorn.interaction",
 
     // RequireJS
     "text": "../external/require/text"
@@ -73,7 +74,8 @@ requirejs.config({
     "popcorn.quiz": [ "popcorn.core" ],
     "popcorn.toc": [ "popcorn.core" ],
     "popcorn.slider": [ "popcorn.core" ],
-    "popcorn.hotspot": [ "popcorn.core" ]
+    "popcorn.hotspot": [ "popcorn.core" ],
+    "popcorn.interaction": [ "popcorn.core" ]
   }
 });
 
@@ -97,6 +99,7 @@ define([
   "popcorn.toc",
   "popcorn.slider",
   "popcorn.hotspot",
+  "popcorn.interaction",
   "popcorn.HTMLMediaElement",
   "popcorn.HTMLNullVideoElement",
   "popcorn.HTMLSoundCloudAudioElement",
