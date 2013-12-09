@@ -12,6 +12,7 @@ requirejs.config({
     "popcorn.HTMLSoundCloudAudioElement": "../external/popcorn-js/wrappers/soundcloud/popcorn.HTMLSoundCloudAudioElement",
     "popcorn.HTMLVimeoVideoElement": "../external/popcorn-js/wrappers/vimeo/popcorn.HTMLVimeoVideoElement",
     "popcorn.HTMLYouTubeVideoElement": "../external/popcorn-js/wrappers/youtube/popcorn.HTMLYouTubeVideoElement",
+    "popcorn.HTMLJWPlayerVideoElement": "../external/popcorn-js/wrappers/jwplayer/popcorn.HTMLJWPlayerVideoElement",
 
     // Players
     "popcorn.player": "../external/popcorn-js/modules/player/popcorn.player",
@@ -49,6 +50,7 @@ requirejs.config({
     "popcorn.HTMLSoundCloudAudioElement": [ "popcorn.core", "popcorn._MediaElementProto" ],
     "popcorn.HTMLVimeoVideoElement": [ "popcorn.core", "popcorn._MediaElementProto" ],
     "popcorn.HTMLYouTubeVideoElement": [ "popcorn.core", "popcorn._MediaElementProto" ],
+    "popcorn.HTMLJWPlayerVideoElement": [ "popcorn.core", "popcorn._MediaElementProto" ],
 
     // Players
     "popcorn.player": [ "popcorn.core" ],
@@ -96,7 +98,8 @@ define([
   "popcorn.HTMLNullVideoElement",
   "popcorn.HTMLSoundCloudAudioElement",
   "popcorn.HTMLVimeoVideoElement",
-  "popcorn.HTMLYouTubeVideoElement"
+  "popcorn.HTMLYouTubeVideoElement",
+  "popcorn.HTMLJWPlayerVideoElement"
 ], function() {
   return {};
 });

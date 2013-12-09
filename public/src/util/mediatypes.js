@@ -2,8 +2,6 @@
  * If a copy of the MIT license was not distributed with this file, you can
  * obtain one at https://raw.github.com/mozilla/butter/master/LICENSE */
 
-"use strict";
-
 define( [ "util/uri" ],
   function( URI ) {
 
@@ -13,10 +11,57 @@ define( [ "util/uri" ],
         SoundCloud: /(?:https?:\/\/www\.|https?:\/\/|www\.|\.|^)(soundcloud)/,
         // supports #t=<start>,<duration>
         // where start or duration can be: X, X.X or XX:XX
-        "null": /^\s*#t=(?:\d*(?:(?:\.|\:)?\d+)?),?(\d+(?:(?:\.|\:)\d+)?)\s*$/
+        "null": /^\s*#t=(?:\d*(?:(?:\.|\:)?\d+)?),?(\d+(?:(?:\.|\:)\d+)?)\s*$/,
+        Flickr: /https?:\/\/(www\.)flickr.com/
       },
       YOUTUBE_EMBED_DISABLED = "Embedding of this YouTube video is disabled",
+      YOUTUBE_EMBED_UNPLAYABLE = "This YouTube video is unplayable",
+      YOUTUBE_EMBED_PRIVATE = "Private videos cannot be loaded. Please use a public or unlisted video.",
+      EMBED_UNPLAYABLE = "This media source is unplayable",
       SOUNDCLOUD_EMBED_DISABLED = "Embedding of this SoundCloud audio source is disabled";
+
+  function jwPlayerFallback( options, successCallback, errorCallback ) {
+    // We hit an error trying to load HTML5, try the jwplayer instead
+    var media,
+        div = document.createElement( "div" ),
+        container = document.createElement( "div" );
+
+    div.style.height = "400px";
+    div.style.width = "400px";
+    div.style.left = "-400px";
+    div.style.position = "absolute";
+    container.style.height = "100%";
+    container.style.width = "100%";
+
+    document.body.appendChild( div );
+    div.appendChild( container );
+
+    function errorEvent() {
+      media.removeEventListener( "loadedmetadata", readyEvent, false );
+      media.removeEventListener( "error", errorEvent, false );
+      errorCallback( EMBED_UNPLAYABLE );
+      document.body.removeChild( div );
+    }
+
+    function readyEvent() {
+      media.removeEventListener( "loadedmetadata", readyEvent, false );
+      media.removeEventListener( "error", errorEvent, false );
+      document.body.removeChild( div );
+      successCallback({
+        source: options.source,
+        title: options.title || options.source,
+        type: options.type,
+        thumbnail: options.thumbnail || "",
+        linkback: options.linkback,
+        duration: media.duration
+      });
+    }
+    container.id = Popcorn.guid( "popcorn-jwplayer-" );
+    media = Popcorn.HTMLJWPlayerVideoElement( container );
+    media.addEventListener( "error", errorEvent, false );
+    media.addEventListener( "loadedmetadata", readyEvent, false );
+    media.src = options.source;
+  }
 
   return {
     checkUrl: function( url ) {
@@ -31,6 +76,7 @@ define( [ "util/uri" ],
     },
     getMetaData: function( baseUrl, successCallback, errorCallback ) {
       var id,
+          userId,
           parsedUri,
           splitUriDirectory,
           xhrURL,
@@ -66,6 +112,13 @@ define( [ "util/uri" ],
 
           document.body.appendChild( div );
 
+          if ( resp.error ) {
+            if ( resp.error.code === 403 ){
+              return errorCallback( YOUTUBE_EMBED_PRIVATE );
+            }
+            errorCallback( YOUTUBE_EMBED_UNPLAYABLE );
+          }
+
           if ( !respData ) {
             return;
           }
@@ -75,8 +128,16 @@ define( [ "util/uri" ],
             return;
           }
 
+          function errorEvent() {
+            popcorn.off( "loadedmetadata", readyEvent );
+            popcorn.off( "error", errorEvent );
+            errorCallback( YOUTUBE_EMBED_UNPLAYABLE );
+            popcorn.destroy();
+          }
+
           function readyEvent() {
             popcorn.off( "loadedmetadata", readyEvent );
+            popcorn.off( "error", errorEvent );
             document.body.removeChild( div );
             popcorn.destroy();
 
@@ -103,6 +164,7 @@ define( [ "util/uri" ],
 
           source = "http://www.youtube.com/watch?v=" + id;
           popcorn = Popcorn.smart( div, source );
+          popcorn.on( "error", errorEvent );
           if ( popcorn.media.readyState >= 1 ) {
             readyEvent();
           } else {
@@ -113,7 +175,8 @@ define( [ "util/uri" ],
         parsedUri = URI.parse( baseUrl );
         splitUriDirectory = parsedUri.directory.split( "/" );
         id = splitUriDirectory[ splitUriDirectory.length - 1 ];
-        xhrURL = "https://api.soundcloud.com/tracks/" + id + ".json?callback=?&client_id=PRaNFlda6Bhf5utPjUsptg";
+        userId = splitUriDirectory[ splitUriDirectory.length - 2 ];
+        xhrURL = "https://api.soundcloud.com/tracks/" + id + ".json?callback=?&client_id=PRaNFlda6Bhf5utPjUsptg&user_id=" + userId;
         Popcorn.getJSONP( xhrURL, function( respData ) {
           if ( !respData ) {
             return;
@@ -164,9 +227,17 @@ define( [ "util/uri" ],
             source: baseUrl,
             type: type,
             title: baseUrl.substring( baseUrl.lastIndexOf( "/" ) + 1 ),
-            thumbnail: videoElem,
+            thumbnail: URI.makeUnique( baseUrl ).toString(),
             duration: videoElem.duration
           });
+        }, false );
+        videoElem.addEventListener( "error", function() {
+          var options = {
+            source: baseUrl,
+            type: type,
+            title: baseUrl
+          };
+          jwPlayerFallback( options, successCallback, errorCallback );
         }, false );
         videoElem.src = URI.makeUnique( baseUrl ).toString();
       }

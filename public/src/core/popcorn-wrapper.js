@@ -3,14 +3,7 @@
  * obtain one at https://raw.github.com/mozilla/butter/master/LICENSE */
 /*jshint evil:true*/
 
-define( [
-          "core/logger", "core/eventmanager", "util/uri",
-          "util/warn", "../../external/PluginDetect/PluginDetect_Flash"
-        ],
-        function(
-          Logger, EventManager, URI,
-          Warn, PluginDetect
-        ){
+define( [ "core/logger", "core/eventmanager", "util/uri" ], function( Logger, EventManager, URI ){
 
   // regex to determine the type of player we need to use based on the provided url
   var __urlRegex = /(?:http:\/\/www\.|http:\/\/|www\.|\.|^)(youtu|vimeo|soundcloud|baseplayer)/;
@@ -24,12 +17,7 @@ define( [
 
   // Hard coded value for now. We need to chat with whoever is in charge of Mozilla's
   // PFS2 instance to see if we can use the service / what limitations there might be
-  var MIN_FLASH_VERSION = 11,
-
-      FLASH_WARNING_TEXT = "Your web browser has an outdated Flash plugin." +
-        " Flash media may not function as expected. Check your plugin version" +
-        " using <a href=\"https://www.mozilla.org/plugincheck\">Mozilla's plugin" +
-        " checking service</a>. Click <a href=\"#\" class=\"close-button\">here</a> to remove this warning.";
+  var MIN_FLASH_VERSION = 11;
 
   /* The Popcorn-Wrapper wraps various functionality and setup associated with
    * creating, updating, and removing associated data with Popcorn.js.
@@ -244,14 +232,6 @@ define( [
         // our regex only handles youtu ( incase the url looks something like youtu.be )
         if ( mediaType === "youtu" ) {
           mediaType = "youtube";
-        }
-
-        if ( !_checkedFlashVersion ) {
-          _checkedFlashVersion = true;
-          flashVersion = PluginDetect.getVersion( "Flash" );
-          if ( flashVersion && +flashVersion.split( "," )[ 0 ] < MIN_FLASH_VERSION ) {
-            Warn.showWarning( FLASH_WARNING_TEXT );
-          }
         }
       }
       return mediaType;
@@ -510,10 +490,21 @@ define( [
       }
     }
 
+    function onSequencesReady() {
+      _popcorn.off( "sequencesReady", onSequencesReady );
+      _popcorn.play();
+    }
+
     // Passthrough to the Popcorn instances play method
     this.play = function(){
+      var waiting = document.querySelector( ".embed" ).getAttribute( "data-state-waiting" );
       if ( _mediaReady && _popcorn.paused() ) {
-        _popcorn.play();
+        if ( !waiting ) {
+          _popcorn.play();
+        } else {
+          document.querySelector( ".play-button-container .status-button" ).setAttribute( "data-state", true );
+          _popcorn.on( "sequencesReady", onSequencesReady );
+        }
       }
     };
 
