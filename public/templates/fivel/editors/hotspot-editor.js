@@ -418,6 +418,7 @@
         _butter.currentMedia.popcorn.popcorn.off( "error-frame-return", setActiveFrame );
 
         setupClickBlockers();
+
       }
     });
   });
