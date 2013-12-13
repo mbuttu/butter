@@ -30,8 +30,14 @@
         <select>
           <option value="YouTube" id="select-youtube">YouTube</option>
           <option value="Giphy" id="select-giphy">Giphy</option>
+          <option value="Rackspace" id="select-rackspace">Rackspace</option>
         </select>
         <textarea class="search-media-input" placeholder="Type what you want to search for here"></textarea>
+        <!-- Used for Custom Rackspace UI -->
+        <div class="rackspace-container butter-hidden">
+          <select class="rackspace-select"></select>
+          <textarea class="search-media-input rackspace" placeholder="Type a prefix to search on here"></textarea>
+        </div>
       </div>
       <span class="butter-btn-slide-out">
         <a class="add-media-btn butter-btn btn-green hidden">Create Clip</a>
@@ -47,6 +53,7 @@
           <ul class="media-gallery-list" id="project-items" data-page="1"></ul>
           <ul class="media-gallery-list" id="youtube-items" data-page="1"></ul>
           <ul class="media-gallery-list" id="giphy-items" data-page="1"></ul>
+          <ul class="media-gallery-list" data-query="temp" id="rackspace-items" data-page="1"></ul>
         </div>
       </div>
     </div>

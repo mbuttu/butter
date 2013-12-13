@@ -30,11 +30,15 @@ define( [ "util/lang", "util/uri", "util/xhr", "util/keys", "util/mediatypes", "
       _pagingContainer = _parentElement.querySelector( ".paging-container" ),
       _projectTab = _parentElement.querySelector( ".project-tab" ),
       _searchTab = _parentElement.querySelector( ".search-tab" ),
+      _rackspaceContainer = _parentElement.querySelector( ".rackspace-container" ),
+      _rackspaceSelect = _rackspaceContainer.querySelector( "select" ),
+      _rackspaceInput = _rackspaceContainer.querySelector( "textarea" ),
 
       _itemContainers = {
         project: _galleryList,
         YouTube: _galleryPanel.querySelector( "#youtube-items" ),
-        Giphy: _galleryPanel.querySelector( "#giphy-items" )
+        Giphy: _galleryPanel.querySelector( "#giphy-items" ),
+        Rackspace: _galleryPanel.querySelector( "#rackspace-items" )
       },
       _sectionContainers = {
         project: _addMediaPanel.querySelector( ".project-clips" ),
@@ -191,7 +195,7 @@ define( [ "util/lang", "util/uri", "util/xhr", "util/keys", "util/mediatypes", "
     data.duration = ( +data.duration );
 
     dragNDrop( thumbnailBtn, {
-      source: data.source,
+      source: URI.makeUnique( data.source ).toString(),
       denied: data.denied,
       end: data.duration,
       from: data.from || 0,
@@ -418,6 +422,10 @@ define( [ "util/lang", "util/uri", "util/xhr", "util/keys", "util/mediatypes", "
       return onDenied( "Your search contained no results!" );
     }
 
+    if ( _currentSearch === "Rackspace" && !_rackspaceInput.value ) {
+      return;
+    }
+
     query = value;
     container.setAttribute( "data-query", value );
 
@@ -432,7 +440,9 @@ define( [ "util/lang", "util/uri", "util/xhr", "util/keys", "util/mediatypes", "
     loadingLi.innerHTML = "<span class=\"media-loading-spinner butter-spinner media-gallery-loading\" ></span>";
     container.appendChild( loadingLi );
 
-    XHR.get( "/api/webmaker/search/" + _currentSearch + "?page=" + page + "&q=" + query, function( data ) {
+    XHR.get( "/api/webmaker/search/" + _currentSearch + "?page=" + page +
+             "&q=" + query + "&container=" + _rackspaceSelect.value +
+             "&prefix=" + _rackspaceInput.value, function( data ) {
       container.innerHTML = "";
 
       if ( data.status === "okay" ) {
@@ -440,7 +450,7 @@ define( [ "util/lang", "util/uri", "util/xhr", "util/keys", "util/mediatypes", "
 
         // If the user selects the project tab before finishing, we still populate that container
         // with results, but prevent the pagination controls from displaying.
-        if ( !_projectTab.classList.contains( "butter-active" ) ) {
+        if ( !_projectTab.classList.contains( "butter-active" )  && search !== "Rackspace" ) {
           pagination( page, data.total, pagingSearchCallback );
         } else {
           pagination( 1, 0, pagingSearchCallback );
@@ -448,7 +458,21 @@ define( [ "util/lang", "util/uri", "util/xhr", "util/keys", "util/mediatypes", "
 
         if ( data.results && data.results.length ) {
           for ( var k = 0; k < data.results.length; k++ ) {
-            if ( search !== "Flickr" && search !== "Giphy" ) {
+            if ( search === "Rackspace" ) {
+              if ( !data.results[ k ].duration ) {
+                MediaUtils.getMetaData( data.results[ k ].source, function( clip ) {
+                  addMedia( clip, {
+                    container: container,
+                    callback: addMediaCallback
+                  });
+                });
+              } else {
+                addMedia( data.results[ k ], {
+                  container: container,
+                  callback: addMediaCallback
+                });
+              }
+            } else if ( search !== "Flickr" && search !== "Giphy" ) {
               addMedia( data.results[ k ], {
                 container: container,
                 callback: addMediaCallback
@@ -644,6 +668,15 @@ define( [ "util/lang", "util/uri", "util/xhr", "util/keys", "util/mediatypes", "
             container.style.display = "";
             _galleryHeader.innerHTML = _currentSearch + " " + _resultsText;
             pagination( container.dataset.page, container.dataset.total, pagingSearchCallback );
+
+            if ( key === "Rackspace" ) {
+              _searchInput.classList.add( "butter-hidden" );
+              _rackspaceContainer.classList.remove( "butter-hidden" );
+            } else {
+              _searchInput.classList.remove( "butter-hidden" );
+              _rackspaceContainer.classList.add( "butter-hidden" );
+            }
+
           } else {
             container.style.display = "none";
           }
@@ -697,6 +730,28 @@ define( [ "util/lang", "util/uri", "util/xhr", "util/keys", "util/mediatypes", "
     }, false );
 
     setup();
+
+    // Retrieve list of rackspace containers
+    XHR.get( "/api/webmaker/search/rackspace/containers", function( data ) {
+      if ( data.containerNames ) {
+        var option;
+
+        for ( var i = 0; i < data.containerNames.length; i++ ) {
+          option = document.createElement( "option" );
+
+          option.value = data.containerNames[ i ];
+          option.innerHTML = data.containerNames[ i ].charAt( 0 ).toUpperCase() + data.containerNames[ i ].slice( 1 );
+
+          _rackspaceSelect.appendChild( option );
+        }
+
+        _rackspaceInput.addEventListener( "keydown", function( e ) {
+          if ( e.keyCode === KeysUtils.ENTER ) {
+            pagingSearchCallback( 1 );
+          }
+        }, false );
+      }
+    });
 
     Editor.BaseEditor.extend( _this, butter, rootElement, {
       open: function() {},

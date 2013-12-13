@@ -136,7 +136,8 @@ require( 'express-persona' )( app, {
 
 require( "webmaker-mediasync" )( app, {
   serviceKeys: {
-    giphy: config.SYNC_GIPHY
+    giphy: config.SYNC_GIPHY,
+    rackspace: config.RACKSPACE_KEY
   },
   limit: 20
 });
