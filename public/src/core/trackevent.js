@@ -63,8 +63,21 @@ define( [ "./logger", "./eventmanager", "./observer",
 
     function defaultValue( item ) {
       if ( item.hasOwnProperty( "default" ) ) {
+
+        // Is the default an Array or Object?
+        if ( typeof item.default === "object" ) {
+
+          // Assumes default will be empty array
+          if ( !item.default.length ) {
+            return [];
+          }
+
+          return {};
+        }
+
         return item.default;
       }
+
       return item.type === "number" ? 0 : "";
     }
 
