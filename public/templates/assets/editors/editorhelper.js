@@ -1,3 +1,4 @@
+/*global Butter*/
 (function( global, $ ) {
   var plugins = {};
 
@@ -14,15 +15,15 @@
 
   function calculateFinalPositions( event, ui, trackEvent, targetContainer, container, options ) {
     var target = targetContainer.getBoundingClientRect(),
-        cont = container.getBoundingClientRect(),
-        height = cont.height,
-        width = cont.width,
+        height = container.clientHeight,
+        width = container.clientWidth,
         top = ui.position.top,
         left = ui.position.left,
         targetHeight = target.height,
         targetWidth = target.width,
         minHeightPix = targetHeight * ( ( options.minHeight || 0 ) / 100 ),
-        minWidthPix = targetWidth * ( ( options.minWidth || 0 ) / 100 );
+        minWidthPix = targetWidth * ( ( options.minWidth || 0 ) / 100 ),
+        dimensions;
 
     top = Math.max( 0, top );
     left = Math.max( 0, left );
@@ -40,272 +41,354 @@
     height = ( height / targetHeight ) * 100;
     width = ( width / targetWidth ) * 100;
 
-    if ( options.end ) {
-      options.end();
-    }
-
     // Enforce container size here, instead of relying on the update.
     container.style.width = width + "%";
     container.style.height = height + "%";
 
     blurActiveEl();
 
-    trackEvent.update({
+    dimensions = {
       height: height,
       width: width,
       top: ( top / targetHeight ) * 100,
       left: ( left / targetWidth ) * 100
-    });
+    };
+
+    if ( options.end ) {
+      options.end( dimensions, container );
+    } else {
+      trackEvent.update( dimensions );
+    }
   }
 
   EditorHelper.init = function( butter ) {
 
-    require( [ "util/xhr" ], function( XHR ) {
-      /**
-       * Member: draggable
-       *
-       * Makes a container draggable using jQueryUI
-       *
-       * @param {TrackEvent} trackEvent: The trackEvent to update when position changes
-       * @param {DOMElement} dragContainer: the container which to apply draggable to
-       * @param {media} The current media's target element in Butter ( parent container )
-       * @param {Object} extra options to apply to the draggable call
-       *                 Options are:
-       *                    {DOMElement} handle: Restrict drag start event to this element
-       *                    {Function} start: Function to execute on drag start event
-       *                    {Function} end: Fucntion to execute on drag end event
-       */
-      global.EditorHelper.draggable = function( trackEvent, dragContainer, targetContainer, options ) {
-        if ( $( dragContainer ).data( "draggable" ) ) {
+    /**
+     * Member: draggable
+     *
+     * Makes a container draggable using jQueryUI
+     *
+     * @param {TrackEvent} trackEvent: The trackEvent to update when position changes
+     * @param {DOMElement} dragContainer: the container which to apply draggable to
+     * @param {media} The current media's target element in Butter ( parent container )
+     * @param {Object} extra options to apply to the draggable call
+     *                 Options are:
+     *                    {DOMElement} handle: Restrict drag start event to this element
+     *                    {Function} start: Function to execute on drag start event
+     *                    {Function} end: Fucntion to execute on drag end event
+     */
+    global.EditorHelper.draggable = function( trackEvent, dragContainer, targetContainer, options ) {
+      if ( $( dragContainer ).data( "draggable" ) ) {
+        return;
+      }
+
+      var iframeCover = targetContainer.querySelector( ".butter-iframe-fix" );
+
+      options = options || {};
+
+      var el = document.createElement( "div" ),
+          stopPropagation = false,
+          onBlur,
+          onStopPropagation,
+          onMouseDown,
+          onMouseUp,
+          onDblClick,
+          tooltipElement;
+
+      if ( !options.disableTooltip ) {
+        tooltipElement = document.createElement( "div" );
+        tooltipElement.innerHTML = options.tooltip || "Double click to edit";
+        tooltipElement.classList.add( "butter-tooltip" );
+        tooltipElement.classList.add( "butter-tooltip-middle" );
+        dragContainer.appendChild( tooltipElement );
+        tooltipElement.style.marginTop = "-" + ( tooltipElement.offsetHeight / 2 ) + "px";
+      }
+
+      onBlur = function() {
+        if ( stopPropagation ) {
+          stopPropagation = false;
           return;
         }
-
-        var iframeCover = targetContainer.querySelector( ".butter-iframe-fix" );
-
-        options = options || {};
-
-        function createHelper( suffix ) {
-          var el = document.createElement( "div" );
-          el.classList.add( "ui-draggable-handle" );
-          el.classList.add( "ui-draggable-" + suffix );
-          return el;
+        if ( tooltipElement ) {
+          tooltipElement.classList.remove( "tooltip-off" );
         }
+        dragContainer.removeEventListener( "mousedown", onStopPropagation, false );
+        el.addEventListener( "dblclick", onDblClick, false );
+        document.removeEventListener( "mousedown", onBlur, false );
+        el.style.display = "";
+        dragContainer.classList.remove( "track-event-editing" );
+      };
+      onStopPropagation = function() {
+        stopPropagation = true;
+      };
+      onDblClick = function() {
+        if ( tooltipElement ) {
+          tooltipElement.classList.add( "tooltip-off" );
+        }
+        dragContainer.addEventListener( "mousedown", onStopPropagation, false );
+        el.removeEventListener( "dblclick", onDblClick, false );
+        document.addEventListener( "mousedown", onBlur, false );
+        el.style.display = "none";
+        dragContainer.classList.add( "track-event-editing" );
+      };
+      el.classList.add( "ui-draggable-handle" );
+      if ( options.editable !== false ) {
+        el.addEventListener( "dblclick", onDblClick, false );
+      }
 
-        dragContainer.appendChild( createHelper( "top" ) );
-        dragContainer.appendChild( createHelper( "bottom" ) );
-        dragContainer.appendChild( createHelper( "left" ) );
-        dragContainer.appendChild( createHelper( "right" ) );
-        dragContainer.appendChild( createHelper( "grip" ) );
+      dragContainer.appendChild( el );
 
-        $( dragContainer ).draggable({
-          handle: ".ui-draggable-handle",
-          containment: "parent",
-          start: function() {
-            iframeCover.style.display = "block";
-
-            // Open the editor
-            butter.editor.editTrackEvent( trackEvent );
-
-            if ( options.start ) {
-              options.start();
-            }
-          },
-          stop: function( event, ui ) {
-            iframeCover.style.display = "none";
-
-            calculateFinalPositions( event, ui, trackEvent, targetContainer, dragContainer, options );
-          }
-        });
+      onMouseDown = function() {
+        document.addEventListener( "mouseup", onMouseUp, false );
+        el.removeEventListener( "mouseup", onMouseDown, false );
+        dragContainer.style.overflow = "hidden";
       };
 
-      /**
-       * Member: resizable
-       *
-       * Makes a container resizable using jQueryUI
-       *
-       * @param {TrackEvent} trackEvent: The trackEvent to update when size changes
-       * @param {DOMElement} resizeContainer: the container which to apply resizable to
-       * @param {media} The current media's target element in Butter ( parent container )
-       * @param {Object} extra options to apply to the resizeable call
-       *                 Options are:
-       *                    {String} handlePositions: describes where to position resize handles ( i.e. "n,s,e,w" )
-       *                              - Recommended that this option is specified due to a bug in z-indexing with
-       *                                jQueryUI Resizable.
-       *                    {Function} start: Function to execute on resize start event
-       *                    {Function} end: Fucntion to execute on resize end event
-       *                    {Number} minWidth: Minimum width that the resizeContainer should be
-       *                    {Number} minHeight: Minimum height that the resizeContainer should be
-       */
-      global.EditorHelper.resizable = function( trackEvent, resizeContainer, targetContainer, options ) {
-        if ( $( resizeContainer ).data( "resizable" ) ) {
-          return;
-        }
-
-        var iframeCover = targetContainer.querySelector( ".butter-iframe-fix" );
-
-        options = options || {};
-
-        $( resizeContainer ).resizable({
-          handles: options.handlePositions,
-          start: function() {
-            iframeCover.style.display = "block";
-
-            // Open the editor
-            butter.editor.editTrackEvent( trackEvent );
-
-            if ( options.start ) {
-              options.start();
-            }
-          },
-          containment: "parent",
-          stop: function( event, ui ) {
-            iframeCover.style.display = "none";
-
-            calculateFinalPositions( event, ui, trackEvent, targetContainer, resizeContainer, options );
-          }
-        });
+      onMouseUp = function() {
+        document.removeEventListener( "mouseup", onMouseUp, false );
+        el.addEventListener( "mouseup", onMouseDown, false );
+        dragContainer.style.overflow = "";
       };
 
-      /**
-       * Member: contentEditable
-       *
-       * Makes a container's content editable using contenteditable
-       *
-       * @param {TrackEvent} trackEvent: The trackEvent to update when content changes
-       * @param {DOMElement} contentContainer: the container which to listen for changes and set as editable
-       */
-      global.EditorHelper.contentEditable = function( trackEvent, contentContainers ) {
-        var newText = "",
-            contentContainer,
-            updateText,
-            updateTrackEvent,
-            onBlur,
-            onKeyDown,
-            onMouseDown;
+      // This ensures the height of the element is not increased
+      el.addEventListener( "mousedown", onMouseDown, false );
 
-        updateText = function() {
-          newText = "";
-          for ( var i = 0, l = contentContainers.length; i < l; i++ ) {
-            contentContainer = contentContainers[ i ];
-            contentContainer.innerHTML = contentContainer.innerHTML.replace( /<br>/g, "\n" );
-            newText += contentContainer.textContent;
-            if ( i < l - 1 ) {
-              newText += "\n";
-            }
-          }
-        };
-        updateTrackEvent = function() {
-          blurActiveEl();
-          trackEvent.update({
-            text: newText
-          });
-        };
-        onBlur = function() {
-          // store the new text.
-          updateText();
-          // update the text after any existing events are done.
-          // this way we do not revert any other event's changes.
-          setTimeout( updateTrackEvent, 0 );
-        };
-        onKeyDown = function( e ) {
-          // enter key for an update.
-          // shift + enter for newline.
-          if ( !e.shiftKey && e.keyCode === 13 ) {
-            updateText();
-            updateTrackEvent();
-          }
-        };
-        onMouseDown = function( e ) {
-          e.stopPropagation();
+      $( dragContainer ).draggable({
+        handle: ".ui-draggable-handle",
+        containment: "parent",
+        start: function() {
+          iframeCover.style.display = "block";
 
           // Open the editor
           butter.editor.editTrackEvent( trackEvent );
 
-          $( contentContainer ).draggable( "destroy" );
-        };
+          if ( options.start ) {
+            options.start();
+          }
+        },
+        stop: function( event, ui ) {
+          iframeCover.style.display = "none";
 
+          calculateFinalPositions( event, ui, trackEvent, targetContainer, dragContainer, options );
+        }
+      });
+
+      return {
+        edit: onDblClick
+      };
+    };
+
+    /**
+     * Member: resizable
+     *
+     * Makes a container resizable using jQueryUI
+     *
+     * @param {TrackEvent} trackEvent: The trackEvent to update when size changes
+     * @param {DOMElement} resizeContainer: the container which to apply resizable to
+     * @param {media} The current media's target element in Butter ( parent container )
+     * @param {Object} extra options to apply to the resizeable call
+     *                 Options are:
+     *                    {String} handlePositions: describes where to position resize handles ( i.e. "n,s,e,w" )
+     *                              - Recommended that this option is specified due to a bug in z-indexing with
+     *                                jQueryUI Resizable.
+     *                    {Function} start: Function to execute on resize start event
+     *                    {Function} end: Fucntion to execute on resize end event
+     *                    {Number} minWidth: Minimum width that the resizeContainer should be
+     *                    {Number} minHeight: Minimum height that the resizeContainer should be
+     */
+    global.EditorHelper.resizable = function( trackEvent, resizeContainer, targetContainer, options ) {
+      if ( $( resizeContainer ).data( "resizable" ) ) {
+        return;
+      }
+
+      var iframeCover = targetContainer.querySelector( ".butter-iframe-fix" ),
+          handlePositions = options.handlePositions;
+
+      function createHelper( suffix ) {
+        var el = document.createElement( "div" );
+        el.classList.add( "ui-resizable-handle" );
+        el.classList.add( "ui-resizable-" + suffix );
+        return el;
+      }
+
+      if ( handlePositions.search( /\bn\b/ ) > -1 ) {
+        resizeContainer.appendChild( createHelper( "top" ) );
+      }
+      if ( handlePositions.search( /\bs\b/ ) > -1 ) {
+        resizeContainer.appendChild( createHelper( "bottom" ) );
+      }
+      if ( handlePositions.search( /\bw\b/ ) > -1 ) {
+        resizeContainer.appendChild( createHelper( "left" ) );
+      }
+      if ( handlePositions.search( /\be\b/ ) > -1 ) {
+        resizeContainer.appendChild( createHelper( "right" ) );
+      }
+
+      options = options || {};
+
+      $( resizeContainer ).resizable({
+        handles: options.handlePositions,
+        start: function() {
+          iframeCover.style.display = "block";
+
+          // Open the editor
+          butter.editor.editTrackEvent( trackEvent );
+
+          if ( options.start ) {
+            options.start();
+          }
+        },
+        containment: "parent",
+        stop: function( event, ui ) {
+          iframeCover.style.display = "none";
+
+          calculateFinalPositions( event, ui, trackEvent, targetContainer, resizeContainer, options );
+        }
+      });
+    };
+
+    /**
+     * Member: contentEditable
+     *
+     * Makes a container's content editable using contenteditable
+     *
+     * @param {TrackEvent} trackEvent: The trackEvent to update when content changes
+     * @param {DOMElement} contentContainer: the container which to listen for changes and set as editable
+     */
+    global.EditorHelper.contentEditable = function( trackEvent, contentContainers ) {
+      var newText = "",
+          contentContainer,
+          updateText,
+          updateTrackEvent,
+          onBlur,
+          onKeyDown,
+          onMouseDown;
+
+      updateText = function() {
+        newText = "";
         for ( var i = 0, l = contentContainers.length; i < l; i++ ) {
           contentContainer = contentContainers[ i ];
-          if ( contentContainer ) {
-            contentContainer.addEventListener( "blur", onBlur, false );
-            contentContainer.addEventListener( "keydown", onKeyDown, false );
-            contentContainer.addEventListener( "mousedown", onMouseDown, false );
-            contentContainer.setAttribute( "contenteditable", "true" );
+          contentContainer.innerHTML = contentContainer.innerHTML.replace( /<br>/g, "\n" );
+          newText += contentContainer.textContent;
+          if ( i < l - 1 ) {
+            newText += "\n";
           }
         }
       };
+      updateTrackEvent = function() {
+        blurActiveEl();
+        trackEvent.update({
+          text: newText
+        });
+      };
+      onBlur = function() {
+        // store the new text.
+        updateText();
+        // update the text after any existing events are done.
+        // this way we do not revert any other event's changes.
+        setTimeout( updateTrackEvent, 0 );
+      };
+      onKeyDown = function( e ) {
+        // enter key for an update.
+        // shift + enter for newline.
+        if ( !e.shiftKey && e.keyCode === 13 ) {
+          updateText();
+          updateTrackEvent();
+        }
+      };
+      onMouseDown = function( e ) {
+        e.stopPropagation();
 
-      /**
-       * Member: droppable
-       *
-       * Make a container listen for drop events for loading images from a local machine
-       *
-       * @param {TrackEvent} trackEvent: The trackEvent to update when content changes
-       * @param {DOMElement} dropContainer: The container that listens for the drop events
-       */
+        // Open the editor
+        butter.editor.editTrackEvent( trackEvent );
 
-      global.EditorHelper.droppable = function( trackEvent, dropContainer, callback ) {
-        dropContainer.addEventListener( "dragover", function( e ) {
-          e.preventDefault();
-          dropContainer.classList.add( "butter-dragover" );
-        }, false );
+        $( contentContainer ).draggable( "destroy" );
+      };
 
-        dropContainer.addEventListener( "dragleave", function( e ) {
-          e.preventDefault();
-          dropContainer.classList.remove( "butter-dragover" );
-        }, false );
+      for ( var i = 0, l = contentContainers.length; i < l; i++ ) {
+        contentContainer = contentContainers[ i ];
+        if ( contentContainer ) {
+          contentContainer.addEventListener( "blur", onBlur, false );
+          contentContainer.addEventListener( "keydown", onKeyDown, false );
+          contentContainer.addEventListener( "mousedown", onMouseDown, false );
+          contentContainer.setAttribute( "contenteditable", "true" );
+        }
+      }
+    };
 
-        dropContainer.addEventListener( "mousedown", function( e ) {
-          // Prevent being able to drag the images inside and re drop them
-          e.preventDefault();
-        }, false );
+    /**
+     * Member: droppable
+     *
+     * Make a container listen for drop events for loading images from a local machine
+     *
+     * @param {TrackEvent} trackEvent: The trackEvent to update when content changes
+     * @param {DOMElement} dropContainer: The container that listens for the drop events
+     */
 
-        dropContainer.addEventListener( "drop", function( e ) {
-          var file, fd;
+    global.EditorHelper.droppable = function( trackEvent, dropContainer ) {
+      dropContainer.addEventListener( "dragover", function( e ) {
+        e.preventDefault();
+        dropContainer.classList.add( "butter-dragover" );
+      }, false );
 
-          e.preventDefault();
-          e.stopPropagation();
+      dropContainer.addEventListener( "dragleave", function( e ) {
+        e.preventDefault();
+        dropContainer.classList.remove( "butter-dragover" );
+      }, false );
 
-          dropContainer.classList.remove( "butter-dragover" );
+      dropContainer.addEventListener( "mousedown", function( e ) {
+        // Prevent being able to drag the images inside and re drop them
+        e.preventDefault();
+      }, false );
 
-          if ( !e.dataTransfer || !e.dataTransfer.files || !e.dataTransfer.files[ 0 ] ) {
-            butter.dispatch( "droppable-unsupported" );
-            return;
-          }
+      dropContainer.addEventListener( "drop", function( e ) {
+        var file, fd;
 
-          file = e.dataTransfer.files[ 0 ];
-          fd = new FormData();
-          fd.append( "image", file );
+        e.preventDefault();
+        e.stopPropagation();
 
+        dropContainer.classList.remove( "butter-dragover" );
+
+        if ( !e.dataTransfer || !e.dataTransfer.files || !e.dataTransfer.files[ 0 ] ) {
+          butter.dispatch( "droppable-unsupported" );
+          return;
+        }
+
+        file = e.dataTransfer.files[ 0 ];
+        fd = new FormData();
+        fd.append( "image", file );
+
+
+        require( [ "util/xhr" ], function( XHR ) {
           XHR.put( "/api/image", fd, function( data ) {
             if ( !data.error ) {
               if ( trackEvent ) {
                 trackEvent.update( { src: data.url } );
-              } else {
-                callback( data.url );
               }
+
+              butter.dispatch( "droppable-succeeded", data.url );
             } else {
               butter.dispatch( "droppable-upload-failed", data.error );
             }
           });
+        });
 
-          if ( trackEvent ) {
-            butter.editor.editTrackEvent( trackEvent );
-          }
-        }, false );
-      };
-
-      function _updateFunction( e ) {
-
-        var trackEvent = e.target;
-
-        if ( trackEvent.popcornTrackEvent && plugins[ trackEvent.type ] ) {
-          plugins[ trackEvent.type ]( trackEvent, butter.currentMedia.popcorn.popcorn );
+        if ( trackEvent ) {
+          butter.editor.editTrackEvent( trackEvent );
         }
-      } //updateFunction
+      }, false );
+    };
 
-      butter.listen( "trackeventupdated", _updateFunction );
-    });
+    function _updateFunction( e ) {
+
+      var trackEvent = e.target;
+
+      if ( trackEvent.popcornTrackEvent && plugins[ trackEvent.type ] ) {
+        plugins[ trackEvent.type ]( trackEvent, butter.currentMedia.popcorn.popcorn );
+      }
+    } //updateFunction
+
+    butter.listen( "trackeventupdated", _updateFunction );
   };
 
   EditorHelper.addPlugin = function( plugin, callback ) {
