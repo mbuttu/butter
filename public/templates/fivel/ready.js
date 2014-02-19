@@ -51,9 +51,35 @@
 
           var exportButton = document.getElementById( "export" );
           exportButton.addEventListener( "click", function( e ) {
-            popcornString = "(function() {\n" +
-                                  butter.currentMedia.generatePopcornString() + "\n" +
-                               "})();\n";
+            var mediaData = butter.currentMedia.json,
+                sequencerSources = [],
+                trackEvents = [],
+                track, trackEvent;
+
+            for ( var i = 0; i < mediaData.tracks.length; i++ ) {
+              track = mediaData.tracks[ i ];
+
+              if ( track.trackEvents.length ) {
+                for ( var k = 0; k < track.trackEvents.length; k++ ) {
+                  trackEvent = track.trackEvents[ k ];
+
+                  if ( trackEvent.type === "sequencer" ) {
+                    sequencerSources = sequencerSources.concat( trackEvent.popcornOptions.source.concat( trackEvent.popcornOptions.fallback ) );
+                  } else {
+                    trackEvents.push({
+                      type: trackEvent.type,
+                      popcornOptions: trackEvent.popcornOptions
+                    });
+                  }
+                }
+              }
+            }
+
+            popcornString = JSON.stringify({
+              sources: sequencerSources,
+              trackEvents: trackEvents
+            }, null, 2 );
+
             butter.dialog.spawn( "export", {
               data: {
                 popcornString: popcornString,
