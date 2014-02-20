@@ -44,14 +44,14 @@
           options: [ "Custom", "Middle", "Bottom", "Top" ],
           values: [ "custom", "middle", "bottom", "top" ],
           label: "Text Position",
-          "default": "custom"
+          "default": "bottom"
         },
         alignment: {
           elem: "select",
           options: [ "Center", "Left", "Right" ],
           values: [ "center", "left", "right" ],
           label: "Text Alignment",
-          "default": "left"
+          "default": "center"
         },
         start: {
           elem: "input",
@@ -228,7 +228,7 @@
       options.fontFamily = options.fontFamily ? options.fontFamily : options._natives.manifest.options.fontFamily[ "default" ];
       // Store reference to generated sheet for removal later, remove any existing ones
       options._fontSheet = fontSheet;
-      document.head.appendChild( fontSheet );
+      document.getElementsByTagName( "head" )[ 0 ].appendChild( fontSheet );
 
       fontSheet.onload = function () {
         innerContainer.style.fontFamily = options.fontFamily;
@@ -308,7 +308,7 @@
       }
 
       if ( options._fontSheet ) {
-        document.head.removeChild( options._fontSheet );
+        document.getElementsByTagName( "head" )[ 0 ].removeChild( options._fontSheet );
       }
     }
   });
