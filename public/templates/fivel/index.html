@@ -13,9 +13,12 @@
   <link rel="stylesheet" href="../../../css/transitions.css">
   <link rel="stylesheet" href="../assets/plugins/text/popcorn.text.css">
   <link rel="stylesheet" href="plugins/slider/popcorn.slider.css">
+  <link rel="stylesheet" href="plugins/interaction/popcorn.interaction.css">
+  <link rel="stylesheet" href="plugins/hotspot/popcorn.hotspot.css">
 
   <link href="//www.mozilla.org/tabzilla/media/css/tabzilla.css" rel="stylesheet">
 
+  <script src="/external/jwplayer.js" data-butter-exclude></script>
   <script src="../../src/butter.js" data-butter-exclude></script>
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js" data-butter-exclude></script>
   <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.9.1/jquery-ui.min.js" data-butter-exclude></script>
@@ -24,20 +27,21 @@
   <script src="editors/slider.js" data-butter-exclude></script>
   <script src="editors/quiz.js" data-butter-exclude></script>
   <script src="editors/toc.js" data-butter-exclude></script>
+  <script src="editors/hotspot.js" data-butter-exclude></script>
   <script type="text/javascript" src="ready.js" data-butter-exclude></script>
 
   <link rel="stylesheet" href="styles.css" />
 
 </head>
-<body>
+<body class="embed">
   <div id="template-container">
     <div data-butter="target" id="toc"></div>
     <div id="video-container" data-butter="target" data-butter-default>
       <div id="video" data-butter="media" data-butter-media-control="true"></div>
     </div>
     <div data-butter="target" id="quiz-container"></div>
+    <div class="loading-message"></div>
   </div>
-  <div class="loading-message show-global"></div>
   <button id="opentoc" data-butter-exclude>Open TOC Editor</button>
   <button id="export" data-butter-exclude>Export</button>
 </body>

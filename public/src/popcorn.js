@@ -12,6 +12,7 @@ requirejs.config({
     "popcorn.HTMLSoundCloudAudioElement": "../external/popcorn-js/wrappers/soundcloud/popcorn.HTMLSoundCloudAudioElement",
     "popcorn.HTMLVimeoVideoElement": "../external/popcorn-js/wrappers/vimeo/popcorn.HTMLVimeoVideoElement",
     "popcorn.HTMLYouTubeVideoElement": "../external/popcorn-js/wrappers/youtube/popcorn.HTMLYouTubeVideoElement",
+    "popcorn.HTMLJWPlayerVideoElement": "../external/popcorn-js/wrappers/jwplayer/popcorn.HTMLJWPlayerVideoElement",
 
     // Players
     "popcorn.player": "../external/popcorn-js/modules/player/popcorn.player",
@@ -33,6 +34,8 @@ requirejs.config({
     "popcorn.quiz": "../templates/fivel/plugins/popcorn.quiz",
     "popcorn.toc": "../templates/fivel/plugins/popcorn.toc",
     "popcorn.slider": "../templates/fivel/plugins/slider/popcorn.slider",
+    "popcorn.interaction": "../templates/fivel/plugins/interaction/popcorn.interaction",
+    "popcorn.hotspot": "../templates/fivel/plugins/hotspot/popcorn.hotspot",
 
     // RequireJS
     "text": "../external/require/text"
@@ -49,6 +52,7 @@ requirejs.config({
     "popcorn.HTMLSoundCloudAudioElement": [ "popcorn.core", "popcorn._MediaElementProto" ],
     "popcorn.HTMLVimeoVideoElement": [ "popcorn.core", "popcorn._MediaElementProto" ],
     "popcorn.HTMLYouTubeVideoElement": [ "popcorn.core", "popcorn._MediaElementProto" ],
+    "popcorn.HTMLJWPlayerVideoElement": [ "popcorn.core", "popcorn._MediaElementProto" ],
 
     // Players
     "popcorn.player": [ "popcorn.core" ],
@@ -69,7 +73,9 @@ requirejs.config({
     "popcorn.wikipedia": [ "popcorn.core" ],
     "popcorn.quiz": [ "popcorn.core" ],
     "popcorn.toc": [ "popcorn.core" ],
-    "popcorn.slider": [ "popcorn.core" ]
+    "popcorn.slider": [ "popcorn.core" ],
+    "popcorn.interaction": [ "popcorn.core" ],
+    "popcorn.hotspot": [ "popcorn.core" ]
   }
 });
 
@@ -92,11 +98,14 @@ define([
   "popcorn.quiz",
   "popcorn.toc",
   "popcorn.slider",
+  "popcorn.interaction",
+  "popcorn.hotspot",
   "popcorn.HTMLMediaElement",
   "popcorn.HTMLNullVideoElement",
   "popcorn.HTMLSoundCloudAudioElement",
   "popcorn.HTMLVimeoVideoElement",
-  "popcorn.HTMLYouTubeVideoElement"
+  "popcorn.HTMLYouTubeVideoElement",
+  "popcorn.HTMLJWPlayerVideoElement"
 ], function() {
   return {};
 });
