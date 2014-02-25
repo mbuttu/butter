@@ -2,16 +2,15 @@
 
 EditorHelper.addPlugin( "slider", function( trackEvent ) {
   var _container,
-      _popcornOptions,
       target;
 
-  _popcornOptions = trackEvent.popcornTrackEvent;
-  _container = _popcornOptions._container;
-  target = _popcornOptions._target;
+  _container = trackEvent.popcornTrackEvent._container;
+  target = trackEvent.popcornTrackEvent._target;
 
   if ( window.jQuery ) {
-
-    window.EditorHelper.draggable( trackEvent, _container, target );
+    EditorHelper.draggable( trackEvent, _container, target, {
+      disableTooltip: true,
+      editable: false
+    });
   }
-
 });
