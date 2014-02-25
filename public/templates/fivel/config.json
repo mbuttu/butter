@@ -9,7 +9,8 @@
     "text": "{{baseDir}}templates/assets/editors/text/text-editor.js",
     "toc": "{{baseDir}}templates/fivel/editors/toc-editor.js",
     "slider": "{{baseDir}}templates/fivel/editors/slider-editor.js",
-    "interaction": "{{baseDir}}templates/fivel/editors/interaction-editor.js"
+    "interaction": "{{baseDir}}templates/fivel/editors/interaction-editor.js",
+    "hotspot": "{{baseDir}}templates/fivel/editors/hotspot-editor.js"
   },
   "plugin": {
     "plugins": [
@@ -49,6 +50,11 @@
         "type": "slider",
         "displayName": "slider",
         "path": "{{baseDir}}templates/fivel/plugins/slider/popcorn.slider.js"
+      },
+      {
+        "type": "hotspot",
+        "path": "{{baseDir}}templates/fivel/plugins/hotspot/popcorn.hotspot.js",
+        "icon": "{{baseDir}}templates/fivel/plugins/hotspot/hotspot-icon.png"
       }
     ]
   },
