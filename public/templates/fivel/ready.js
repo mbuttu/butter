@@ -1,3 +1,5 @@
+/*global $*/
+
 (function ( Butter, EditorHelper ){
   document.addEventListener( "DOMContentLoaded", function( e ){
     Butter.init({
@@ -64,7 +66,49 @@
               }
             }).open();
           });
-      });
+        });
+
+        require(["/templates/fivel/controls.js"], function(Controls) {
+          var popcorn = butter.currentMedia.popcorn.popcorn;
+          var controls = new Controls(popcorn, "[[Course Name]]", "video-container");
+
+          $("#video").bind("contextmenu", function(){
+            return false;
+          });
+
+          popcorn.on("loadedmetadata", function() {
+            $("#resumeDiv").show();
+          });
+
+          $("#playerCloseCaption").click(function() {
+            popcorn.toggle("text");
+          });
+
+          $("#resumeDiv").click(function() {
+            popcorn.play();
+            $("#resumeDiv").hide();
+          });
+
+          popcorn.on('seeked', function() {
+            $("#resumeDiv").hide();
+          });
+
+          popcorn.on('seeking', function() {
+            $("#resumeDiv").hide();
+          });
+
+          popcorn.on("playing", function() {
+            $("#resumeDiv").hide();
+          });
+
+          popcorn.on("play", function() {
+            $("#resumeDiv").hide();
+          });
+
+          popcorn.on("pause", function() {
+            $("#resumeDiv").show();
+          });
+        });
       }
     });
   }, false );

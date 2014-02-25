@@ -5,7 +5,6 @@
   "baseDir": "../../",
   "savedDataUrl": "saved-data.json",
   "editor": {
-    "quiz": "{{baseDir}}templates/fivel/editors/quiz-editor.js",
     "text": "{{baseDir}}templates/assets/editors/text/text-editor.js",
     "toc": "{{baseDir}}templates/fivel/editors/toc-editor.js",
     "slider": "{{baseDir}}templates/fivel/editors/slider-editor.js",
@@ -36,11 +35,6 @@
         "hidden": "true",
         "displayName": "toc",
         "path": "{{baseDir}}templates/fivel/plugins/popcorn.toc"
-      },
-      {
-        "type": "quiz",
-        "displayName": "quiz",
-        "path": "{{baseDir}}templates/fivel/plugins/popcorn.quiz.js"
       },
       {
         "type": "interaction",
