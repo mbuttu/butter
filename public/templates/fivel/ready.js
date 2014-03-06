@@ -94,47 +94,65 @@
           });
         });
 
-        require(["/templates/fivel/controls.js"], function(Controls) {
-          var popcorn = butter.currentMedia.popcorn.popcorn;
-          var controls = new Controls(popcorn, "[[Course Name]]", "video-container");
-
-          $("#video").bind("contextmenu", function(){
-            return false;
+        function init( window, document ) {
+          var require = requirejs.config({
+            baseUrl: "/"
           });
 
-          popcorn.on("loadedmetadata", function() {
-            $("#resumeDiv").show();
-          });
+          require(["/templates/fivel/controls.js"], function(Controls) {
+            var popcorn = butter.currentMedia.popcorn.popcorn;
+            var controls = new Controls(popcorn, "[[Course Name]]", "video-container");
 
-          $("#playerCloseCaption").click(function() {
-            popcorn.toggle("text");
-          });
+            $("#video").bind("contextmenu", function(){
+              return false;
+            });
 
-          $("#resumeDiv").click(function() {
-            popcorn.play();
-            $("#resumeDiv").hide();
-          });
+            popcorn.on("loadedmetadata", function() {
+              $("#resumeDiv").show();
+            });
 
-          popcorn.on('seeked', function() {
-            $("#resumeDiv").hide();
-          });
+            $("#playerCloseCaption").click(function() {
+              popcorn.toggle("text");
+            });
 
-          popcorn.on('seeking', function() {
-            $("#resumeDiv").hide();
-          });
+            $("#resumeDiv").click(function() {
+              popcorn.play();
+              $("#resumeDiv").hide();
+            });
 
-          popcorn.on("playing", function() {
-            $("#resumeDiv").hide();
-          });
+            popcorn.on('seeked', function() {
+              $("#resumeDiv").hide();
+            });
 
-          popcorn.on("play", function() {
-            $("#resumeDiv").hide();
-          });
+            popcorn.on('seeking', function() {
+              $("#resumeDiv").hide();
+            });
 
-          popcorn.on("pause", function() {
-            $("#resumeDiv").show();
+            popcorn.on("playing", function() {
+              $("#resumeDiv").hide();
+            });
+
+            popcorn.on("play", function() {
+              $("#resumeDiv").hide();
+            });
+
+            popcorn.on("pause", function() {
+              $("#resumeDiv").show();
+            });
           });
-        });
+        }
+
+        // Source tree case vs. require-built case.
+        if ( typeof require === "undefined" ) {
+          var requireScript = document.createElement( "script" );
+          requireScript.src = "../../external/require/require.js";
+          requireScript.onload = function() {
+            init( window, window.document );
+          };
+          document.head.appendChild( requireScript );
+        } else {
+          init( window, window.document );
+        }
       }
     });
   }, false );
