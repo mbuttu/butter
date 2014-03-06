@@ -85,6 +85,10 @@ app.configure( function() {
         "/src/webmakernav.js": {
           include: [ "webmakernav" ],
           mainConfigFile: WWW_ROOT + "/src/webmakernav.js",
+        },
+        "/templates/fivel/ready.js": {
+          include: [ "ready" ],
+          mainConfigFile: WWW_ROOT + "/templates/fivel/ready.js"
         }
       },
       defaults: {
