@@ -38,7 +38,8 @@
       },
       {
         "type": "interaction",
-        "icon": "{{baseDir}}templates/fivel/plugins/interaction/interaction-icon.png"
+        "icon": "{{baseDir}}templates/fivel/plugins/interaction/interaction-icon.png",
+        "path": "{{baseDir}}templates/fivel/plugins/interaction/popcorn.interaction.js"
       },
       {
         "type": "slider",

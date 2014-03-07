@@ -912,7 +912,8 @@
         };
       },
       start: function( event, options ) {
-        var that = this;
+        var that = this,
+            isEditor = options.isEditor;
 
         var isHelperReady = function() {
           if ( _mousetrapHelper ) {
@@ -931,7 +932,7 @@
               }
             }
 
-            if ( !that.isEditor ) {
+            if ( !isEditor ) {
               window.addEventListener( "keydown", stopPropagation, false );
             }
             that.pause();
@@ -944,8 +945,9 @@
 
         isHelperReady();
       },
-      end: function() {
-        var that = this;
+      end: function( event, options ) {
+        var that = this,
+            isEditor = options.isEditor;
 
         var isHelperReady = function() {
           if ( _mousetrapHelper ) {
@@ -958,7 +960,7 @@
               _mousetrapHelper.unbindSequence( sequences.macSequence );
             }
 
-            if ( !that.isEditor ) {
+            if ( !isEditor ) {
               window.removeEventListener( "keydown", stopPropagation, false );
             }
           } else {

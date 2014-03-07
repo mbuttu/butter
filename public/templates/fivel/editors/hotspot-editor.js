@@ -347,6 +347,7 @@
         editorFramePanel = document.querySelector( "[data-frame-editor-container-id='" + activeFrame.id + "']" );
         editorFrameOption = document.querySelector( "[data-frame-editor-option-id='" + activeFrame.id + "']" );
         pluginFramePanel = document.querySelector( "[data-frame-container-id='" + activeFrame.id + "']" );
+        _activeFrameContainer = editorFramePanel;
 
         editorFramePanel.classList.remove( "butter-hidden" );
         editorFrameOption.selected = true;

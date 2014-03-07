@@ -55,6 +55,12 @@ define( [ "util/lang", "util/uri", "util/xhr", "util/keys", "util/mediatypes", "
       _media,
       _mediaLoadTimeout,
       _cancelSpinner,
+
+      _photoTypes = [
+        "Flickr",
+        "Giphy"
+      ],
+
       // Must match the value specified on the server end
       // This version of popcorn maker is missing other code that would
       // allow for config options to specify it
