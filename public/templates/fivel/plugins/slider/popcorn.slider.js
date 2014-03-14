@@ -345,6 +345,9 @@
         }
 
         return parseText( matches[ 1 ], parsedText );
+      } else if ( !parsedText.length ) {
+        // No links found
+        parsedText.push( string );
       }
 
       return parsedText;
@@ -448,11 +451,6 @@
           "default": "Add links using the [markdown](http://goo.gl/wPqayl) link syntax.",
           instructions: "Add links using the [markdown](http://goo.gl/wPqayl) link syntax.",
           hidden: false
-        },
-        // The description as viewed by the end-user,
-        // i.e. no markup (html or markdown)
-        textDescription: {
-          hidden: true
         },
         icon: {
           elem: "select",
