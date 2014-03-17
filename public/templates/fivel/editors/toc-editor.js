@@ -23,33 +23,28 @@
     }
 
     function updateTrackEvent(){
-      var sections = _elements.sections.children;
+      var sections = _elements.sections.children,
+          updateOptions = {
+            sections: []
+          };
 
       setErrorState( false );
 
-      _popcornOptions.sections = [];
-
       for ( var idx = 0; idx < sections.length; idx++ ){
-        var section = _popcornOptions.sections[ idx ];
-        if ( !section ){
-          section = _popcornOptions.sections[ idx ] = {};
-        }
-
+        var section = {};
         section.title = sections[ idx ].querySelector( ".toc-section-title" ).value;
         section.time = sections[ idx ].querySelector( ".toc-section-time" ).value;
         section.description = sections[ idx ].querySelector( ".toc-section-description" ).value;
+        updateOptions.sections.push( section );
       }
 
-      _popcornOptions.target = _elements.target.value;
+      updateOptions.target = _elements.target.value;
 
-      try{
-        _trackEvent.update( _popcornOptions );
-      }
-      catch( e ){
+      try {
+        _trackEvent.update( updateOptions );
+      } catch( e ){
         setErrorState( e.toString() );
       }
-
-      onEditorOpen();
     }
 
     function onEditorOpen( e ){
@@ -140,12 +135,13 @@
 
         _targets = _this.createTargetsList( [ butter.currentMedia ].concat( butter.targets ) );
         _trackEvent = trackEvent;
-        // _trackEvent.view.element.style.display = "none";
         _popcornOptions = _trackEvent.popcornOptions;
         _this.applyExtraHeadTags( compiledLayout );
+        butter.listen( "trackeventupdated", onEditorOpen );
         onEditorOpen();
       },
       close: function(){
+        butter.unlisten( "trackeventupdated", onEditorOpen );
         _this.removeExtraHeadTags();
       }
     });
