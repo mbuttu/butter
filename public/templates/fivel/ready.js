@@ -100,45 +100,56 @@
           });
 
           require(["/templates/fivel/controls.js"], function(Controls) {
-            var popcorn = butter.currentMedia.popcorn.popcorn;
-            var controls = new Controls(popcorn, "[[Course Name]]", "video-container");
+            function setupControls() {
+              var popcorn = butter.currentMedia.popcorn.popcorn;
+              var controls = new Controls(popcorn, "[[Course Name]]", "video-container");
 
-            $("#video").bind("contextmenu", function(){
-              return false;
+              $("#video").bind("contextmenu", function(){
+                return false;
+              });
+
+              popcorn.on("loadedmetadata", function() {
+                $("#resumeDiv").show();
+              });
+
+              $("#playerCloseCaption").click(function() {
+                popcorn.toggle("text");
+              });
+
+              $("#resumeDiv").click(function() {
+                popcorn.play();
+                $("#resumeDiv").hide();
+              });
+
+              popcorn.on('seeked', function() {
+                $("#resumeDiv").hide();
+              });
+
+              popcorn.on('seeking', function() {
+                $("#resumeDiv").hide();
+              });
+
+              popcorn.on("playing", function() {
+                $("#resumeDiv").hide();
+              });
+
+              popcorn.on("play", function() {
+                $("#resumeDiv").hide();
+              });
+
+              popcorn.on("pause", function() {
+                $("#resumeDiv").show();
+              });
+            }
+
+            // In this version of Butter when the duration of the timline is increased
+            // the popcorn instance is destroyed and rebuilt. This causes all old
+            // event listeners to not function.
+            butter.listen( "mediaready", function() {
+              setupControls();
             });
 
-            popcorn.on("loadedmetadata", function() {
-              $("#resumeDiv").show();
-            });
-
-            $("#playerCloseCaption").click(function() {
-              popcorn.toggle("text");
-            });
-
-            $("#resumeDiv").click(function() {
-              popcorn.play();
-              $("#resumeDiv").hide();
-            });
-
-            popcorn.on('seeked', function() {
-              $("#resumeDiv").hide();
-            });
-
-            popcorn.on('seeking', function() {
-              $("#resumeDiv").hide();
-            });
-
-            popcorn.on("playing", function() {
-              $("#resumeDiv").hide();
-            });
-
-            popcorn.on("play", function() {
-              $("#resumeDiv").hide();
-            });
-
-            popcorn.on("pause", function() {
-              $("#resumeDiv").show();
-            });
+            setupControls();
           });
         }
 
