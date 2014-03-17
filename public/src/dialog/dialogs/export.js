@@ -13,5 +13,6 @@ define([ "text!dialog/dialogs/export.html", "dialog/dialog" ],
     dialog.enableCloseButton();
     dialog.assignEscapeKey( "default-close" );
     dialog.assignEnterKey( "default-ok" );
+    dialog.assignButton( ".cancel", "default-close" );
   });
 });
