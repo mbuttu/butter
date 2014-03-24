@@ -23,7 +23,47 @@
     return quarantine;
   }
 
-  var MEDIA_LOAD_TIMEOUT = 10000;
+  var _waiting = 0;
+
+  var loadingHandler = {
+    loading: [],
+    compare: function( a, b ) {
+      return a.start - b.start;
+    },
+    add: function( options, beginLoad ) {
+      var _this = this;
+      this.loading.push({
+        start: options.start,
+        end: options.end,
+        beginLoad: beginLoad
+      });
+      this.loading.sort( this.compare );
+      if ( this.loading.length === 1 ) {
+        setTimeout( function() {
+          _this.next();
+        }, 0 );
+      }
+    },
+    next: function( currentTime ) {
+      // If no clip is found because we're at the end of any loading
+      // clip's range, default to 0, the first clip in the sequence.
+      var nextClip = 0;
+      // Find the clip closest to the currentTime.
+      for ( var index = 0; index < this.loading.length; index++ ) {
+        if ( this.loading[ index ].start <= currentTime &&
+             this.loading[ index ].end >= currentTime ) {
+          nextClip = index;
+          break;
+        }
+      }
+      // Load the clip, and remove it from the loading clips.
+      // Once the clip is loaded (or fails), it knows to call next.
+      if ( this.loading[ nextClip ] ) {
+        this.loading[ nextClip ].beginLoad();
+      }
+      this.loading.splice( nextClip, 1 );
+    }
+  };
 
   Popcorn.plugin( "sequencer", {
     _setup: function( options ) {
@@ -51,20 +91,30 @@
         target.appendChild( container );
       };
       options.displayLoading = function() {
-        var bigPlay = document.getElementById( "controls-big-play-button" );
-        _this.on( "play", options._surpressPlayEvent );
-        if ( bigPlay ) {
-          bigPlay.classList.add( "hide-button" );
+        if ( !options.waiting ) {
+          options.waiting = true;
+          _waiting++;
+          document.querySelector( ".embed" ).setAttribute( "data-state-waiting", true );
+          document.querySelector( ".embed" ).classList.add( "show-loading" );
         }
-        document.querySelector( ".loading-message" ).classList.add( "show-media" );
       };
       options.hideLoading = function() {
-        var bigPlay = document.getElementById( "controls-big-play-button" );
-        _this.off( "play", options._surpressPlayEvent );
-        if ( bigPlay ) {
-          bigPlay.classList.remove( "hide-button" );
+        if ( options.waiting ) {
+          options.waiting = false;
+          --_waiting;
+          if ( _waiting === 0 ) {
+            _this.emit( "sequencesReady" );
+            document.querySelector( ".embed" ).removeAttribute( "data-state-waiting" );
+            document.querySelector( ".embed" ).classList.remove( "show-loading" );
+          }
         }
-        document.querySelector( ".loading-message" ).classList.remove( "show-media" );
+      };
+      options.setZIndex = function() {
+        if ( !options.hidden && options.active ) {
+          options._container.style.zIndex = +options.zindex;
+        } else {
+          options._container.style.zIndex = 0;
+        }
       };
 
       if ( !options.from || options.from > options.duration ) {
@@ -85,16 +135,19 @@
       };
 
       options.readyEvent = function() {
-        clearTimeout( options.loadTimeout );
+
+        options._clip.media.style.width = "100%";
+        options._clip.media.style.height = "100%";
+        options._container.style.width = "100%";
+        options._container.style.height = "100%";
         // If teardown was hit before ready, ensure we teardown.
         if ( options._cancelLoad ) {
-          if ( options.playWhenReady ) {
-            _this.play();
-          }
+          options.playIfReady();
           options._cancelLoad = false;
           options.tearDown();
         }
         options.failed = false;
+        options._clip.off( "error", options.fail );
         options._clip.off( "loadedmetadata", options.readyEvent );
         options.ready = true;
         options._container.style.width = ( options.width || "100" ) + "%";
@@ -104,7 +157,14 @@
         _this.on( "volumechange", options._volumeEvent );
         if ( options.active ) {
           options._startEvent();
+        } else {
+          options._setClipCurrentTime( +options.from );
         }
+      };
+
+      options.clearLoading = function() {
+        loadingHandler.next( _this.currentTime() );
+        options._clip.off( "loadedmetadata", options.clearLoading );
       };
 
       // Function to ensure the mixup as to if a clip is an array
@@ -118,15 +178,34 @@
       // The clip that failed to load would be ignored,
       // and everything else playable.
       options.fail = function() {
-        _this.off( "play", options._playWhenReadyEvent );
+        options.clearLoading();
         options.failed = true;
-        if ( !options.hidden && options.active ) {
-          options._container.style.zIndex = +options.zindex;
-        }
+        options.setZIndex();
         options.hideLoading();
-        if ( options.playWhenReady ) {
-          _this.play();
+        options.playIfReady();
+      };
+
+      options.attemptJWPlayer = function() {
+        options._clip.off( "error", options.attemptJWPlayer );
+        if ( !options._clip.error ) {
+          // For some reason html5 media clips are throwing error events,
+          // with no actual error, only in the embed...
+          return;
         }
+        var jwDiv = document.createElement( "div" );
+        // Remove the dead html5 video element.
+        options._container.removeChild( document.getElementById( options._clip.media.id ) );
+        options._container.appendChild( jwDiv );
+        jwDiv.id = Popcorn.guid( "popcorn-jwplayer-" );
+        var jwplayer = Popcorn.HTMLJWPlayerVideoElement( jwDiv ),
+            // We use an already decoded src string from before.
+            src = options._clip.media.src;
+        // Now we can fail.
+        options._clip = new Popcorn( jwplayer, { frameAnimation: true } );
+        options._clip.on( "error", options.fail );
+        options._clip.on( "loadedmetadata", options.readyEvent );
+        options._clip.on( "loadedmetadata", options.clearLoading );
+        jwplayer.src = src;
       };
 
       options.tearDown = function() {
@@ -156,64 +235,85 @@
       };
 
       options.clearEvents = function() {
-        _this.off( "play", options._playWhenReadyEvent );
         _this.off( "play", options._playEvent );
         _this.off( "pause", options._pauseEvent );
         _this.off( "seeked", options._onSeeked );
+        _this.off( "timeupdate", options._onTimeUpdate );
       };
 
       options.addSource = function() {
-        if ( options.loadTimeout ) {
-          clearTimeout( options.loadTimeout );
-        }
         // if the video is denied for any reason, most cases youtube embedding disabled,
         // don't bother waiting and display fail case.
         if ( options.denied ) {
           options.fail();
-        } else {
-          options.loadTimeout = setTimeout( options.fail, MEDIA_LOAD_TIMEOUT );
         }
+
+        for ( var i = 0; i < options.source.length; i++ ) {
+          options.source[ i ] = options.source[ i ].trim().split( " " ).join( "" );
+        }
+
         options._clip = Popcorn.smart( options._container, options.source, { frameAnimation: true } );
-        options._clip.media.style.width = "100%";
-        options._clip.media.style.height = "100%";
-        options._container.style.width = "100%";
-        options._container.style.height = "100%";
+
+        options._clip.on( "error", options.attemptJWPlayer );
+
+        if ( options._clip.error ) {
+          options.attemptJWPlayer();
+          return;
+        }
+
         if ( options._clip.media.readyState >= 1 ) {
           options.readyEvent();
+          options.clearLoading();
         } else {
           options._clip.on( "loadedmetadata", options.readyEvent );
+          options._clip.on( "loadedmetadata", options.clearLoading );
         }
       };
 
       options._onProgress = function() {
-        var i, l,
-            buffered = options._clip.media.buffered;
 
-        // We're likely in a wrapper that does not support buffered.
-        // Assume we are buffered.
-        // Once these wrappers have a buffered time range object, it should just work.
-        if ( buffered.length === 0 ) {
+        if ( options._clip.ended() ) {
           return;
         }
+        if ( !options._isBuffering() ) {
+          // We found a valid range so playing can resume.
+          options.hideLoading();
+          if ( options.playIfReady() ) {
+            options._clip.play();
+          }
+          return;
+        }
+      };
+
+      options._isBuffering = function() {
+        var i, l,
+            buffered = options._clip.media.buffered,
+            time = _this.currentTime() - options.start + ( +options.from );
 
         for ( i = 0, l = buffered.length; i < l; i++ ) {
           // Check if a range is valid, if so, return early.
-          if ( buffered.start( i ) <= options._clip.currentTime() &&
-               buffered.end( i ) > options._clip.currentTime() ) {
+          if ( buffered.start( i ) <= time &&
+               buffered.end( i ) > time ) {
             // We found a valid range so playing can resume.
-            if ( options.playWhenReady ) {
-              options.playWhenReady = false;
-              _this.play();
-            }
-            return;
+            return false;
           }
+        }
+        return true;
+      };
+
+      options._onTimeUpdate = function() {
+
+        if ( options._clip.ended() ) {
+          return;
         }
 
         // If we hit here, we failed to find a valid range,
         // so we should probably stop everything. We'll get out of sync.
-        if ( !_this.paused() ) {
+        if ( options._isBuffering() && !_this.paused() ) {
           options.playWhenReady = true;
           _this.pause();
+          options._clip.pause();
+          options.displayLoading();
         }
       };
 
@@ -221,142 +321,83 @@
       // Returns true for successful seeks.
       options._setClipCurrentTime = function( time ) {
         if ( !time && time !== 0 ) {
-          time = _this.currentTime() - options.start + (+options.from);
+          time = _this.currentTime() - options.start + ( +options.from );
         }
         if ( time !== options._clip.currentTime() &&
-             time >= (+options.from) && time <= options.duration ) {
+             time >= ( +options.from ) && time <= options.duration ) {
           options._clip.currentTime( time );
-          // Seek was successful.
-          return true;
         }
       };
 
       // While clip is loading, do not let the timeline play.
-      options._surpressPlayEvent = function() {
-        options.playWhenReady = true;
-        _this.pause();
+      options.playIfReady = function() {
+        if ( options.playWhenReady && !_waiting ) {
+          options.playWhenReady = false;
+          _this.play();
+          return true;
+        }
+        return false;
       };
 
       options.setupContainer();
       if ( options.source ) {
         options.sourceToArray( options, "source" );
-        options.sourceToArray( options, "fallback" );
+        if ( options.fallback ) {
+          options.sourceToArray( options, "fallback" );
+        }
         if ( options.fallback ) {
           options.source = options.source.concat( options.fallback );
         }
-        options.addSource();
+        loadingHandler.add( options, options.addSource );
       }
 
       options._startEvent = function() {
-        // wait for this seek to finish before displaying it
-        // we then wait for a play as well, because youtube has no seek event,
-        // but it does have a play, and won't play until after the seek.
-        // so we know if the play has finished, the seek is also finished.
-        var seekedEvent = function () {
-          var playedEvent = function() {
-            options._clip.off( "play", playedEvent );
-            _this.off( "play", options._playWhenReadyEvent );
-            _this.on( "play", options._playEvent );
-            _this.on( "pause", options._pauseEvent );
-            _this.on( "seeked", options._onSeeked );
-            // Setup on progress after initial load.
-            // This way if an initial load never happens, we never pause.
-            options._clip.on( "progress", options._onProgress );
-            options.hideLoading();
-            if ( !options.hidden && options.active ) {
-              options._container.style.zIndex = +options.zindex;
-            } else {
-              options._container.style.zIndex = 0;
-            }
-            if ( options.playWhenReady ) {
-              _this.play();
-            } else {
-              options._clip.pause();
-            }
-            options._clip.on( "play", options._clipPlayEvent );
-            options._clip.on( "pause", options._clipPauseEvent );
-            if ( options.active ) {
-              options._volumeEvent();
-            }
-          };
-          options._clip.off( "seeked", seekedEvent );
-          options._clip.on( "play", playedEvent );
-          options._clip.play();
-        };
-        options._clip.mute();
-        options._clip.on( "seeked", seekedEvent);
-        // If the seek failed, we're already at the desired time.
-        // fire the seekedEvent right away.
-        if ( !options._setClipCurrentTime() ) {
-          seekedEvent();
+        options._setClipCurrentTime();
+        _this.on( "seeked", options._onSeeked );
+
+        // Ensure this wrapper supports buffered.
+        // Once these wrappers have a buffered time range object, it should just work.
+        if ( options._clip.media.buffered.length ) {
+          _this.on( "timeupdate", options._onTimeUpdate );
+          options._clip.on( "progress", options._onProgress );
         }
-      };
-
-      options._playWhenReadyEvent = function() {
-        options.playWhenReady = true;
-      };
-
-      // Two events for playing the main timeline if the clip is playing.
-      options._clipPlayEvent = function() {
-        if ( _this.paused() ) {
-          _this.off( "play", options._playEvent );
-          _this.on( "play", options._playEventSwitch );
-          _this.play();
-        }
-      };
-
-      // Switch event is used to ensure we don't listen in loops.
-      options._clipPlayEventSwitch = function() {
-        options._clip.off( "play", options._clipPlayEventSwitch );
-        options._clip.on( "play", options._clipPlayEvent );
-      };
-
-      // Two events for playing the clip timeline if the main is playing.
-      options._playEvent = function() {
-        if ( options._clip.paused() ) {
-          options._clip.off( "play", options._clipPlayEvent );
-          options._clip.on( "play", options._clipPlayEventSwitch );
+        if ( options.playIfReady() ) {
           options._clip.play();
         }
-      };
-
-      // Switch event is used to ensure we don't listen in loops.
-      options._playEventSwitch = function() {
-        _this.off( "play", options._playEventSwitch );
         _this.on( "play", options._playEvent );
-      };
-
-      // Two events for pausing the main timeline if the clip is paused.
-      options._clipPauseEvent = function() {
-        if ( !_this.paused() ) {
-          _this.off( "pause", options._pauseEvent );
-          _this.on( "pause", options._pauseEventSwitch );
-          _this.pause();
+        _this.on( "pause", options._pauseEvent );
+        options.hideLoading();
+        options.setZIndex();
+        if ( options.active ) {
+          options._volumeEvent();
         }
       };
 
-      // Switch event is used to ensure we don't listen in loops.
-      options._clipPauseEventSwitch = function() {
-        options._clip.off( "pause", options._clipPauseEventSwitch );
-        options._clip.on( "pause", options._clipPauseEvent );
+      options._endEvent = function() {
+        if ( !options._clip.paused() ) {
+          options._clip.pause();
+        }
+        // reset current time so next play from start is smooth. We've pre seeked.
+        options._setClipCurrentTime( +options.from );
+        options._clip.mute();
+        options._container.style.zIndex = 0;
       };
 
-      // Two events for pausing the clip timeline if the main is paused.
+      options._playEvent = function() {
+        if ( options._clip.paused() &&
+             !_waiting &&
+             !options._clip.ended() ) {
+          options._clip.play();
+        }
+      };
+
       options._pauseEvent = function() {
         if ( !options._clip.paused() ) {
-          options._clip.off( "pause", options._clipPauseEvent );
-          options._clip.on( "pause", options._clipPauseEventSwitch );
           options._clip.pause();
         }
       };
 
-      // Switch event is used to ensure we don't listen in loops.
-      options._pauseEventSwitch = function() {
-        _this.off( "pause", options._pauseEventSwitch );
-        _this.on( "pause", options._pauseEvent );
-      };
-
-      // event to seek the slip if the main timeline seeked.
+      // event to seek the clip if the main timeline seeked.
       options._onSeeked = function() {
         options._setClipCurrentTime();
       };
@@ -382,11 +423,7 @@
       }
       if ( updates.hasOwnProperty( "zindex" ) ) {
         options.zindex = updates.zindex;
-        if ( !options.hidden && options.active ) {
-          options._container.style.zIndex = +options.zindex;
-        } else {
-          options._container.style.zIndex = 0;
-        }
+        options.setZIndex();
       }
       if ( updates.title ) {
         options.title = updates.title;
@@ -396,11 +433,7 @@
       }
       if ( updates.hasOwnProperty( "hidden" ) ) {
         options.hidden = updates.hidden;
-        if ( !options.hidden && options.active ) {
-          options._container.style.zIndex = +options.zindex;
-        } else {
-          options._container.style.zIndex = 0;
-        }
+        options.setZIndex();
       }
       if ( updates.fallback ) {
         options.sourceToArray( updates, "fallback" );
@@ -425,7 +458,6 @@
           // TODO: ensure any pending loads are torn down.
           options.tearDown();
           options.setupContainer();
-          this.on( "play", options._playWhenReadyEvent );
           if ( !this.paused() ) {
             options.playWhenReady = true;
             this.pause();
@@ -433,12 +465,8 @@
               options._clip.pause();
             }
           }
-          options.addSource();
+          loadingHandler.add( options, options.addSource );
         }
-      }
-      if ( updates.hasOwnProperty( "mute" ) ) {
-        options.mute = updates.mute;
-        options._volumeEvent();
       }
       if ( updates.hasOwnProperty( "top" ) ) {
         options.top = updates.top;
@@ -457,6 +485,10 @@
         options._container.style.width = ( options.width || "100" ) + "%";
       }
       if ( options.ready ) {
+        if ( updates.hasOwnProperty( "mute" ) ) {
+          options.mute = updates.mute;
+          options._volumeEvent();
+        }
         if ( updates.hasOwnProperty( "volume" ) ) {
           options.volume = updates.volume;
           options._volumeEvent();
@@ -482,10 +514,8 @@
           options._container.style.zIndex = +options.zindex;
           return;
         }
-        this.on( "play", options._playWhenReadyEvent );
         if ( !this.paused() ) {
           options.playWhenReady = true;
-          options._clip.pause();
         }
         if ( options.ready ) {
           options._startEvent();
@@ -502,20 +532,10 @@
       options.clearEvents();
       options.hideLoading();
       if ( options.ready ) {
-        // video element can be clicked on. Keep them in sync with the main timeline.
-        // We need to also clear these events.
-        options._clip.off( "play", options._clipPlayEvent );
-        options._clip.off( "pause", options._clipPauseEvent );
         options._clip.off( "progress", options._onProgress );
-        if ( !options._clip.paused() ) {
-          options._clip.pause();
-        }
-        // reset current time so next play from start is smooth. We've pre seeked.
-        options._setClipCurrentTime( +options.from );
-      }
-      options._container.style.zIndex = 0;
-      if ( options.ready ) {
-        options._clip.mute();
+        options._endEvent();
+      } else {
+        options._container.style.zIndex = 0;
       }
     },
     manifest: {
@@ -623,10 +643,13 @@
         duration: {
           hidden: true,
           "default": 0
+        },
+        linkback: {
+          hidden: true,
+          "default": ""
         }
       }
     }
   });
 
 }( Popcorn ));
-

@@ -1,0 +1,109 @@
+.slide-transition() {
+  visibility: visible;
+  margin-left: 0;
+  -webkit-transition: margin-left 0.5s ease, visibility 0.5s ease, opacity 0.5s ease;
+  -moz-transition: margin-left 0.5s ease, visibility 0.5s ease, opacity 0.5s ease;
+  -o-transition: margin-left 0.5s ease, visibility 0.5s ease, opacity 0.5s ease;
+  -ms-transition: margin-left 0.5s ease, visibility 0.5s ease, opacity 0.5s ease;
+  transition: margin-left 0.5s ease, visibility 0.5s ease, opacity 0.5s ease;
+}
+
+.popcorn-slide-left {
+  .slide-transition();
+  &.off {
+    visibility: hidden;
+    margin-left: -100% !important;
+  }
+}
+
+.popcorn-slide-right {
+  .slide-transition();
+  &.off {
+    visibility: hidden;
+    margin-left: 100% !important;
+  }
+}
+
+.slider-outer {
+  position: absolute;
+  width: 80%;
+  height: 30%;
+  font-size: 0.9em;
+
+  .slider-inner {
+    border-top-right-radius: 5px;
+    border-bottom-right-radius: 5px;
+    overflow: hidden;
+    position: absolute;
+    left: 25%;
+    top: 0;
+    width: 75%;
+    height: 100%;
+
+    > h2 {
+      margin-left: 5%;
+    }
+    > p {
+      margin-left: 5%;
+      font-style: italic;
+    }
+  }
+
+  .slider-icon {
+    border-top-left-radius: 5px;
+    border-bottom-left-radius: 5px;
+    position: absolute;
+    width: 25%;
+    height: 100%;
+    top: 0;
+    left: 0;
+
+    > img {
+      position: absolute;
+      width: 80%;
+      height: 80%;
+      top: 10%;
+      left: 10%;
+    }
+  }
+
+  .slider-instructions {
+    font-size: 0.8em;
+  }
+}
+
+// Slider Themes
+
+/*
+ * The Slider CSS/LESS was written in a way that by default styles that control things like
+ * positioning and layout to be the defaults. From there, one just needs to define the "outer wrapping"
+ * class and whatever other CSS styles they want to be applied. Use the two below as examples.
+ *
+ * The "outer wrapping" class corresponds to what is placed in the plugins "values" array. For example, if
+ * your theme classes were ".fivel-one" and ".fivel-two" then your array would be [ "fivel-one", "fivel-two" ]
+ */
+
+.popcorn-slider-light {
+  &.slider-outer {
+    margin: -1px;
+    background: white;
+    border: 1px solid black;
+    color: black;
+
+    > .slider-inner {
+      font-size: 100%;
+    }
+  }
+}
+
+.popcorn-slider-dark {
+  &.slider-outer {
+    background: black;
+    color: white;
+    border: 1px dotted white;
+
+    > .slider-inner {
+      font-size: 100%;
+    }
+  }
+}

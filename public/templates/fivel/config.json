@@ -5,10 +5,11 @@
   "baseDir": "../../",
   "savedDataUrl": "saved-data.json",
   "editor": {
-    "quiz": "{{baseDir}}templates/fivel/editors/quiz-editor.js",
     "text": "{{baseDir}}templates/assets/editors/text/text-editor.js",
     "toc": "{{baseDir}}templates/fivel/editors/toc-editor.js",
-    "slider": "{{baseDir}}templates/fivel/editors/slider-editor.js"
+    "slider": "{{baseDir}}templates/fivel/editors/slider-editor.js",
+    "interaction": "{{baseDir}}templates/fivel/editors/interaction-editor.js",
+    "hotspot": "{{baseDir}}templates/fivel/editors/hotspot-editor.js"
   },
   "plugin": {
     "plugins": [
@@ -36,14 +37,19 @@
         "path": "{{baseDir}}templates/fivel/plugins/popcorn.toc"
       },
       {
-        "type": "quiz",
-        "displayName": "quiz",
-        "path": "{{baseDir}}templates/fivel/plugins/popcorn.quiz.js"
+        "type": "interaction",
+        "icon": "{{baseDir}}templates/fivel/plugins/interaction/interaction-icon.png",
+        "path": "{{baseDir}}templates/fivel/plugins/interaction/popcorn.interaction.js"
       },
       {
         "type": "slider",
-        "displayName": "slider",
-        "path": "{{baseDir}}templates/fivel/plugins/slider/popcorn.slider.js"
+        "path": "{{baseDir}}templates/fivel/plugins/slider/popcorn.slider.js",
+        "icon": "{{baseDir}}templates/fivel/plugins/slider/slideout.png"
+      },
+      {
+        "type": "hotspot",
+        "path": "{{baseDir}}templates/fivel/plugins/hotspot/popcorn.hotspot.js",
+        "icon": "{{baseDir}}templates/fivel/plugins/hotspot/hotspot-icon.png"
       }
     ]
   },

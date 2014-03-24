@@ -85,6 +85,10 @@ app.configure( function() {
         "/src/webmakernav.js": {
           include: [ "webmakernav" ],
           mainConfigFile: WWW_ROOT + "/src/webmakernav.js",
+        },
+        "/templates/fivel/ready.js": {
+          include: [ "ready" ],
+          mainConfigFile: WWW_ROOT + "/templates/fivel/ready.js"
         }
       },
       defaults: {
@@ -133,6 +137,15 @@ app.configure( function() {
 require( 'express-persona' )( app, {
   audience: APP_HOSTNAME
 });
+
+require( "webmaker-mediasync" )( app, {
+  serviceKeys: {
+    soundcloud: config.SYNC_SOUNDCLOUD,
+    rackspace: config.RACKSPACE_KEY
+  },
+  limit: 20
+});
+
 
 var routes = require('./routes');
 routes( app, Project, filter, sanitizer, stores, utils, metrics );
@@ -384,6 +397,10 @@ app.get( '/dashboard', filter.isStorageAvailable, function( req, res ) {
       projects: userProjects
     });
   });
+});
+
+app.get( "/external/jwplayer.js", function( req, res ) {
+  res.redirect( "//jwpsrv.com/library/" + config.JWPLAYER_KEY + ".js" );
 });
 
 app.listen( config.PORT, function() {

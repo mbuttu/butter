@@ -96,6 +96,7 @@
     "node-uuid": "1.4.0",
     "requirejs-middleware": "0.0.5",
     "sequelize": "1.6.0",
+    "webmaker-mediasync": "git://github.com/mjschranz/webmaker-mediasync.git#fivel",
     "shelljs": "0.1.2"
   },
   "optionalDependencies": {
