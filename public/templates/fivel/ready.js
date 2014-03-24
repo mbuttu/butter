@@ -10,7 +10,6 @@
         butter.listen( "editoropened", function onEditorOpened() {
           butter.unlisten("editoropened", onEditorOpened);
           var trackEvent = butter.getTrackEventsByType( "toc" )[ 0 ],
-              tocPlugin = document.querySelector( "[data-popcorn-plugin-type=toc]" ),
               popcornString = "",
               script;
 
@@ -33,14 +32,11 @@
             });
           }
 
-          // if ( trackEvent ) {
-          //   // hide the toc track event so that the editor can only be opened
-          //   // from the template
-          //   trackEvent.view.element.style.display = "none";
-          //   // hide the toc plugin from the plugin-list editor so that only one
-          //   // toc can be added to a project
-          //   tocPlugin.style.display = "none";
-          // }
+          if ( trackEvent ) {
+            // hide the toc track event so that the editor can only be opened
+            // from the template
+            trackEvent.view.element.style.display = "none";
+          }
 
           var tocButton = document.getElementById( "opentoc" );
           tocButton.addEventListener( "click", function( e ) {
