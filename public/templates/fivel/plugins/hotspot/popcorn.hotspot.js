@@ -268,7 +268,7 @@
       var target = Popcorn.dom.find( options.target ),
           container = options._container = document.createElement( "div" ),
           self = this,
-          IE = document.getElementsByTagName( "html" )[ 0 ].className.indexOf( "ie8" ) !== -1;
+          IE = document.getElementsByTagName( "html" )[ 0 ].classList.contains( "ie8" ) !== -1;
 
       if ( !target ) {
         target = this.media.parentNode;
@@ -313,6 +313,7 @@
 
       options._target = target;
       container.classList.add( "popcorn-hotspot-wrapper" );
+      options._container.style.display = "none";
       container.style.zIndex = +options.zindex;
       target.appendChild( container );
 
