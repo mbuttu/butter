@@ -171,8 +171,6 @@
     return document.querySelectorAll( "." +  selector );
   };
 
-  var loaded = false;
-
   Popcorn.plugin( "toc", function( options ) {
 
     return {
@@ -341,29 +339,15 @@
           return Popcorn.util.toSeconds( a.time ) - Popcorn.util.toSeconds( b.time );
         });
 
-        // Need to wait until the media is ready, so that we can get the media's duration
-        options.popcorn.on( "loadeddata", function() {
-          loaded = true;
-          onLoaded();
-        });
-
-        // This plugin can be torn down and rebuilt many times, so make sure that onLoaded is called.
-        // The loadeddata event is only called once when the media is ready.
-        if ( loaded ) {
-          onLoaded();
-        }
-
         options.popcorn.on( "ended", onEnded );
 
-        function onLoaded() {
-          for ( var idx = 0; idx < options.sections.length; idx++ ) {
-            var section = options.sections[ idx ],
-                nextSection = options.sections[ idx + 1];
-            setupCue( section, nextSection ? nextSection.time : Math.floor( options.popcorn.duration() ) );
-          }
-
-          options.popcorn.on( "seeking", onSeeking );
+        for ( var idx = 0; idx < options.sections.length; idx++ ) {
+          var section = options.sections[ idx ],
+              nextSection = options.sections[ idx + 1 ];
+          setupCue( section, nextSection ? nextSection.time : Math.floor( options.popcorn.duration() ) );
         }
+
+        options.popcorn.on( "seeking", onSeeking );
 
         function onEnded() {
           if ( !canBeCompleted ) {
