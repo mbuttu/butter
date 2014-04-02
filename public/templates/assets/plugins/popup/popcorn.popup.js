@@ -6,7 +6,7 @@
       events = [],
       soundIndex = 0,
       MAX_AUDIO_TIME = 2,
-      _pluginRoot = "/templates/assets/plugins/popup/",
+      _pluginRoot = "/plugins/icons/",
       FILL_STYLE = "rgb(255, 255, 255)",
       innerDivTriangles = {},
       DEFAULT_FONT = "Tangerine";
