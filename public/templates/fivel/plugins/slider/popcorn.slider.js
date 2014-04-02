@@ -1,10 +1,10 @@
 (function ( Popcorn ) {
 
-  var _pluginRoot = "/templates/assets/plugins/popup/images/";
+  var _pluginRoot = "/plugins/icons/";
 
   /*
    * How to point to and use custom icons.
-   * 
+   *
    * The above URL, _pluginRoot, is an absolute path to where the directory
    * containing the icon files. By default, it's pointing to the icons shared with
    * the Popup plugin.
