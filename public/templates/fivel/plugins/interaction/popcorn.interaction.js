@@ -6,7 +6,7 @@
       _mousetrapHelper,
       _mousetrapLoaded = false;
 
-  importMousetrap.src = "http://cdn.craig.is/js/mousetrap/mousetrap.min.js";
+  importMousetrap.src = "/js/mousetrap/mousetrap.min.js";
   importMousetrap.type = "text/javascript";
 
 
