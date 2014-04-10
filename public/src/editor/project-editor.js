@@ -5,8 +5,8 @@
 define([ "editor/editor", "editor/base-editor",
           "text!layouts/project-editor.html",
           "util/social-media", "ui/widget/textbox",
-          "ui/widget/tooltip" ],
-  function( Editor, BaseEditor, LAYOUT_SRC, SocialMedia, TextboxWrapper, ToolTip ) {
+          "ui/widget/tooltip", "util/xhr" ],
+  function( Editor, BaseEditor, LAYOUT_SRC, SocialMedia, TextboxWrapper, ToolTip, XHR ) {
 
   Editor.register( "project-editor", LAYOUT_SRC, function( rootElement, butter ) {
     var _rootElement = rootElement,
@@ -165,6 +165,171 @@ define([ "editor/editor", "editor/base-editor",
       updateEmbed( _project.iframeUrl );
     });
 
+    function setupLearningMoment() {
+      var lmName = document.querySelector( ".learning-moment-name" ),
+          lmFriendlyName = document.querySelector( ".learning-moment-friendlyName" ),
+          lmDesc = document.querySelector( ".learning-moment-description" ),
+          lmPublishDate = document.querySelector( ".learning-moment-publish" ),
+          lmExpiryDate = document.querySelector( ".learning-moment-expiry" ),
+          lmDocket = document.querySelector( ".learning-moment-docket" ),
+          lmCost = document.querySelector( ".learning-moment-cost" ),
+          lmTags = document.querySelector( ".learning-moment-tags" ),
+          lmFile = document.querySelector( ".learning-moment-image" ),
+          lmSupplier = document.querySelector( ".learning-moment-suppliers" ),
+          lmButton = document.querySelector( ".learning-moment-submit" ),
+          lmInternalNotes = document.querySelector( ".learning-moment-internal-notes" ),
+          lmOptions = {},
+          fd;
+
+      function addListener( element, key ) {
+        element.addEventListener( "blur", function( e ) {
+          lmOptions[ key ] = e.target.value;
+        }, false );
+      }
+
+      addListener( lmName, "courseName" );
+      addListener( lmFriendlyName, "friendlyName" );
+      addListener( lmDesc, "description" );
+      addListener( lmDocket, "docketNumber" );
+      addListener( lmCost, "creditCost" );
+      addListener( lmInternalNotes, "internalNotes" );
+
+      XHR.get( "/api/fivel/courseinfo/" + _project.courseId, function( data ) {
+        if ( data.error ) {
+          return _this.setErrorState( data.error );
+        }
+
+        var tags = data.tags;
+
+        if ( !lmSupplier.children.length ) {
+          for ( var i = 0; i < data.suppliers.length; i++ ) {
+            var option = document.createElement( "option" ),
+                supplier = data.suppliers[ i ];
+
+            option.value = supplier.id;
+            option.innerHTML = supplier.supplierName;
+
+            lmSupplier.appendChild( option );
+          }
+        }
+
+        lmSupplier.addEventListener( "change", function( e ) {
+          lmOptions[ "suppliedBy" ] = e.target.value;
+        }, false );
+
+        // Basically means we have an existing LM
+        // TODO: Come up with some potential solution to show the LM image and quiz.
+        if ( data.course.id ) {
+          var publishDate = new Date( data.course.publishDate ),
+              expiryDate;
+
+          data.course.publishDate = ( publishDate.getMonth() + 1 ) + "/" + publishDate.getDate() + "/" + publishDate.getFullYear();
+
+          if ( data.course.expiryDate ) {
+            expiryDate = new Date( data.course.expiryDate );
+            data.course.expiryDate = ( expiryDate.getMonth() + 1 ) + "/" + expiryDate.getDate() + "/" + expiryDate.getFullYear();
+          }
+
+          lmName.value = data.course.courseName;
+          lmFriendlyName.value = data.course.friendlyName;
+          lmDesc.value = data.course.description;
+          lmDocket.value = data.course.docketNumber || "";
+          lmCost.value = data.course.creditCost;
+          lmTags.value = data.course.tagNames.join( "," );
+          lmPublishDate.value = data.course.publishDate;
+          lmExpiryDate.value = data.course.expiryDate || "";
+          lmInternalNotes.value = data.course.internalNotes || "";
+          lmSupplier.value = data.course.suppliedBy || lmSupplier.children[ 0 ].value;
+        }
+
+        window.jQuery( lmPublishDate ).datepicker({
+          onClose: function( val ) {
+            lmOptions[ "publishDate" ] = val;
+          }
+        });
+
+        window.jQuery( lmExpiryDate ).datepicker({
+          onClose: function( val ) {
+            lmOptions[ "expiryDate" ] = val;
+          }
+        });
+
+        window.jQuery( lmTags ).tagit({
+          availableTags: tags,
+          caseSensitive: false,
+          beforeTagAdded: function( event, ui ) {
+            var found = false;
+
+            tags.forEach( function( tag ) {
+              if ( tag.toLowerCase() === ui.tagLabel.toLowerCase() ) {
+                found = true;
+                $( ui.tag ).find( ".tagit-label" ).html( tag );
+                return;
+              }
+            });
+
+            return found;
+          },
+          afterTagAdded: function() {
+            lmOptions[ "tagNames" ] = lmTags.value;
+          }
+        });
+      });
+
+      lmFile.addEventListener( "change", function() {
+        var imageFd = new FormData(),
+            imagePreview = _rootElement.querySelector( ".learning-moment-image-preview" );
+
+        imagePreview.src = "";
+        imagePreview.classList.add( "butter-hidden" );
+        lmOptions[ "courseImage" ] = lmFile.files[ 0 ];
+        imageFd.append( "image", lmFile.files[ 0 ] );
+        _this.scrollbar.update();
+
+        XHR.put( "/api/image", imageFd, function( data ) {
+          if ( !data.error ) {
+            imagePreview.addEventListener( "load", function onImageLoad() {
+              imagePreview.removeEventListener( "load", onImageLoad );
+              imagePreview.classList.remove( "butter-hidden" );
+              _this.scrollbar.update();
+            });
+            imagePreview.src = data.url;
+          }
+        });
+      }, false );
+
+      function lmSubmit() {
+        lmButton.removeEventListener( "click", lmSubmit );
+
+        if ( !Object.keys( lmOptions ).length ) {
+          return _this.setErrorState( "Must enter learning moment data before submitting." );
+        }
+
+        // Clear error message
+        _this.setErrorState();
+
+        fd = new FormData();
+        for ( var key in lmOptions ) {
+          fd.append( key, lmOptions[ key ] );
+        }
+
+        XHR.put( "/api/fivel/course/?id=" + _project.id + "&courseId=" + _project.courseId, fd, function( data ) {
+          if ( data.error === "okay" ) {
+            var lmAction = _project.courseId ? "updated." : "created.";
+
+            _project.courseId = data.project.courseId;
+            _this.setErrorState( "Learning Moment was successfully " + lmAction, "success" );
+          } else {
+            _this.setErrorState( data.message || data.data || data.error, "error" );
+          }
+
+          lmButton.addEventListener( "click", lmSubmit );
+        });
+      }
+
+      lmButton.addEventListener( "click", lmSubmit );
+    }
+
     Editor.BaseEditor.extend( this, butter, rootElement, {
       open: function() {
         _project = butter.project;
@@ -192,6 +357,7 @@ define([ "editor/editor", "editor/base-editor",
 
         _this.scrollbar.update();
 
+        setupLearningMoment();
       },
       close: function() {
       }

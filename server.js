@@ -353,6 +353,203 @@ app.post( '/api/publish/:id',
   });
 });
 
+function authenticateFivel( res, callback ) {
+  request.post({
+    json: true,
+    jar: true,
+    headers: {
+      authorization: "Bearer " + config.FIVEL_TEMP_URL_TOKEN
+    },
+    url: config.FIVEL_SERVER + "/api/login"
+  }, function( err, response, body ) {
+    if ( err || body.error ) {
+      console.log( err || body.error );
+      return res.json( 500, {
+        error: body.error.message || "An error occured."
+      });
+    }
+
+    callback( body );
+  });
+}
+
+app.put( "/api/fivel/course", function( req, res ) {
+  var email = req.session.email,
+      id = parseInt( req.query.id, 10 ),
+      courseId = req.query.courseId;
+
+  if ( isNaN( id ) ) {
+    res.json( { error: "ID was not a number" }, 500 );
+    return;
+  }
+
+  request.get({
+    json: true,
+    url: APP_HOSTNAME + "/api/fivel/courseinfo/" + courseId
+  }, function( err, response, body ) {
+    if ( err ) {
+      return res.json( 500, {
+        message: "Something went wrong",
+        error: err
+      });
+    }
+
+    var projectCourse = body.course;
+
+    Project.find( { id: id, email: email }, function( err, project ) {
+      if ( err ) {
+        return res.json( 500, {
+          message: "Something went wrong",
+          error: err
+        });
+      }
+
+      if ( !project ) {
+        res.json( 404, {
+          message: "project not found"
+        });
+        return;
+      }
+
+      var lmOptions = req.body,
+          message = "",
+          requiredKeys = {
+            "friendlyName": "URL Extension Name",
+            "courseName": "Learning Moment Name",
+            "creditCost": "Credit Cost",
+            "docketNumber": "Docket #",
+            "publishDate": "Publish Date",
+            "tagNames": "Tags",
+            "description": "Description"
+          };
+
+      for ( var key in requiredKeys ) {
+        if ( requiredKeys.hasOwnProperty( key ) ) {
+          if ( !lmOptions[ key ] ) {
+            message += requiredKeys[ key ] + ", ";
+          }
+        }
+      }
+
+      if ( message ) {
+        return res.json( 500, {
+          message: "Missing Options: " + message.substring( 0, message.lastIndexOf( ", " ) ) + "."
+        });
+      }
+
+      var projectData = JSON.parse( project.data, sanitizer.escapeHTMLinJSON );
+      var mediaData = projectData.media[ 0 ],
+          sequencerSources = [],
+          trackEvents = [],
+          track, trackEvent;
+
+      for ( var i = 0; i < mediaData.tracks.length; i++ ) {
+        track = mediaData.tracks[ i ];
+
+        if ( track.trackEvents.length ) {
+          for ( var k = 0; k < track.trackEvents.length; k++ ) {
+            trackEvent = track.trackEvents[ k ];
+
+            if ( trackEvent.type === "sequencer" ) {
+              sequencerSources.push({
+                base: trackEvent.popcornOptions.base,
+                path: trackEvent.popcornOptions.path.replace( ".webm", ".mp4" )
+              });
+
+              sequencerSources.push({
+                base: trackEvent.popcornOptions.base,
+                path: trackEvent.popcornOptions.path
+              });
+            } else {
+              trackEvents.push({
+                type: trackEvent.type,
+                popcornOptions: trackEvent.popcornOptions
+              });
+            }
+          }
+        }
+      }
+
+      lmOptions.popcornMetadata = {
+        sources: sequencerSources,
+        trackEvents: trackEvents
+      };
+
+      lmOptions.courseImage = req.files.courseImage;
+      lmOptions.id = projectCourse._id;
+      lmOptions.oldFriendlyName = projectCourse.friendlyName;
+
+      authenticateFivel( res, function( body ) {
+        request.post({
+          uri: config.FIVEL_SERVER + "/api/admin/catalog/addcourse",
+          json: true,
+          jar: true,
+          headers: {
+            authorization: "Bearer " + config.FIVEL_TEMP_URL_TOKEN
+          },
+          body: lmOptions
+        }, function( err, response, body ) {
+          if ( err || body.error ) {
+            return res.json( 500, {
+              error: err,
+              message: ( body.error && ( body.error.message || body.error.err ) ) || "Something went wrong"
+            });
+          }
+
+          Project.update({
+            data: {
+              courseId: body.course._id
+            },
+            id: id,
+            email: email
+          }, function( err, updatedProject ) {
+            if ( err ) {
+              return res.json( 500, {
+                error: err,
+                message: "Something went wrong"
+              });
+            }
+
+            res.json({
+              error: "okay",
+              project: updatedProject
+            });
+          });
+        });
+      });
+    });
+  });
+});
+
+app.get( "/api/fivel/courseinfo/:id", function( req, res ) {
+  var requestUrl = "/api/admin/catalog/addcourse";
+
+  if ( req.params.id !== "undefined" ) {
+    requestUrl = "/api/admin/catalog/editcourse?id=" + req.params.id;
+  }
+
+  authenticateFivel( res, function( data ) {
+    request.get({
+      uri: config.FIVEL_SERVER + requestUrl,
+      json: true,
+      jar: true,
+      headers: {
+        authorization: "Bearer " + config.FIVEL_TEMP_URL_TOKEN
+      }
+    }, function( err, response, body ) {
+
+      if ( err ) {
+        return res.json( 500, {
+          message: "Something went wrong",
+          error: err
+        });
+      }
+
+      res.json( body );
+    });
+  });
+});
+
 app.get( '/dashboard', filter.isStorageAvailable, function( req, res ) {
   var email = req.session.email;
 
@@ -418,21 +615,7 @@ app.post( "/api/rackspace/tempurl", function( req, res ) {
 
   token = config.FIVEL_TEMP_URL_TOKEN;
 
-  request.post({
-    json: true,
-    jar: true,
-    headers: {
-      authorization: "Bearer " + token
-    },
-    url: config.FIVEL_SERVER + "/api/login"
-  }, function( err, response, body ) {
-    if ( err ) {
-      console.log( err );
-      return res.json( 500, {
-        error: new Error( "An error occured." )
-      });
-    }
-
+  authenticateFivel( res, function( data ) {
     function getTempUrl( source, asyncCallback ) {
       request.get({
         jar: true,

@@ -199,7 +199,6 @@
     .transition( height 0.35s, margin 0.35s, padding 0.35s );
     overflow: hidden;
     height: 0;
-    color: #D93B21;
     visibility: hidden;
     width: 300px;
   }
@@ -207,7 +206,15 @@
   .error-message-container.open {
     padding: 10px 20px;
     padding-right: 15px; //scrollbars
-    background: #F0DDDD;
+
+    &.error {
+      color: #D93B21;
+      background: #F0DDDD;
+    }
+    &.success {
+      background: #3FB58E;
+      color: #FFFFFF;
+    }
   }
 
   // Spacing
