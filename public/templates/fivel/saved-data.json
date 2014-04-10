@@ -15,9 +15,9 @@
     {
       "id": "Media0",
       "name": "Media0",
-      "url": [ "http://videos.mozilla.org/serv/webmademovies/trailer.ogv", "http://videos.mozilla.org/serv/webmademovies/trailer.mp4" ],
+      "url": "#t=,30",
       "target": "video",
-      "duration": 64.54166412353516,
+      "duration": 30,
       "controls": true,
       "tracks": [
         {

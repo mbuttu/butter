@@ -4,11 +4,11 @@
 /*jshint evil:true*/
 
 define( [
-          "core/logger", "core/eventmanager", "util/uri",
+          "core/logger", "util/uri",
           "util/warn", "../../external/PluginDetect/PluginDetect_Flash"
         ],
         function(
-          Logger, EventManager, URI,
+          Logger, URI,
           Warn, PluginDetect
         ){
 

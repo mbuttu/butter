@@ -15,6 +15,8 @@ var express = require('express'),
     filter = require( './lib/filter' )( Project.isDBOnline ),
     sanitizer = require( './lib/sanitizer' ),
     FileStore = require('./lib/file-store.js'),
+    request = require('request'),
+    async = require('async'),
     metrics,
     utils,
     stores = {},
@@ -143,6 +145,7 @@ require( "webmaker-mediasync" )( app, {
     soundcloud: config.SYNC_SOUNDCLOUD,
     rackspace: config.RACKSPACE_KEY
   },
+  region: "ORD",
   limit: 20
 });
 
@@ -401,6 +404,62 @@ app.get( '/dashboard', filter.isStorageAvailable, function( req, res ) {
 
 app.get( "/external/jwplayer.js", function( req, res ) {
   res.redirect( "//jwpsrv.com/library/" + config.JWPLAYER_KEY + ".js" );
+});
+
+app.post( "/api/rackspace/tempurl", function( req, res ) {
+  var token;
+
+  if ( !req.body.sources || !Array.isArray( req.body.sources ) ) {
+    return res.json( 500, {
+      error: "An array of sources is required"
+    });
+  }
+
+  token = config.FIVEL_TEMP_URL_TOKEN;
+
+  request.post({
+    json: true,
+    jar: true,
+    headers: {
+      authorization: "Bearer " + token
+    },
+    url: config.FIVEL_SERVER + "/api/login"
+  }, function( err, response, body ) {
+    if ( err ) {
+      console.log( err );
+      return res.json( 500, {
+        error: new Error( "An error occured." )
+      });
+    }
+
+    function getTempUrl( source, asyncCallback ) {
+      request.get({
+        jar: true,
+        json: true,
+        url: config.FIVEL_SERVER + "/api/generate-temp-url?base=" + source.base + "&path=" + decodeURIComponent( source.path ),
+        headers: {
+          authorization: "Bearer " + token
+        }
+      }, function( err, response, body ) {
+        if ( err ) {
+          return asyncCallback( err );
+        }
+
+        asyncCallback( null, body.source );
+      });
+    }
+
+    async.map( req.body.sources, getTempUrl, function( err, results ) {
+      if ( err ) {
+        console.log( err );
+        return res.json( 500, {
+          error: new Error( "An error occured." )
+        });
+      }
+
+      res.json( results );
+    });
+  });
 });
 
 app.listen( config.PORT, function() {

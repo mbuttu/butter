@@ -299,7 +299,7 @@ window.Butter = {
             popcornOptions.end = popcornOptions.end + start;
           }
           _this.deselectAllTrackEvents();
-          
+
           _this.generateSafeTrackEvent({
             type: e.data.element.getAttribute( "data-popcorn-plugin-type" ),
             popcornOptions: popcornOptions,
