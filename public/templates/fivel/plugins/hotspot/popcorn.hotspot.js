@@ -268,7 +268,7 @@
       var target = Popcorn.dom.find( options.target ),
           container = options._container = document.createElement( "div" ),
           self = this,
-          IE = document.getElementsByTagName( "html" )[ 0 ].classList.contains( "ie8" ) !== -1;
+          IE = document.getElementsByTagName( "html" )[ 0 ].classList.contains( "ie8" );
 
       if ( !target ) {
         target = this.media.parentNode;
