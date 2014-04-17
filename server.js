@@ -349,6 +349,41 @@ app.post( '/api/publish/:id',
   });
 });
 
+var request = require("request");
+request = request.defaults({ jar: true });
+
+var token = "";
+
+function generateTempUrl() {
+  request.post({
+    json: true,
+    headers: {
+      authorization: "Bearer " + token
+    },
+    url: "http://192.168.0.51:8080/api/login"
+  }, function(err, response, body) {
+    if (err) {
+      console.log("Error: ", err);
+    }
+
+    var base = "https://storage101.ord1.clouddrive.com",
+        path = "/v1/MossoCloudFS_5e2e610e-c213-4d66-be71-88010ef370c8/private/CIIP002%20cisco%20jabber%201.mp4";
+
+    request.get({
+      url: "http://192.168.0.51:8080/api/generate-temp-url?base=" + base + "&path=" + path,
+      headers: {
+        authorization: "Bearer " + token
+      }
+    }, function(err, response, body) {
+      console.log('body = ', body);
+    });
+  });
+}
+
+generateTempUrl();
+
+app.get("/testing", generateTempUrl);
+
 app.get( '/dashboard', filter.isStorageAvailable, function( req, res ) {
   var email = req.session.email;
 
