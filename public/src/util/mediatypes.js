@@ -221,7 +221,9 @@ define( [ "util/uri" ],
           duration: +REGEX_MAP[ "null" ].exec( baseUrl )[ 1 ]
         });
       } else if ( type === "HTML5" ) {
-        var title = baseUrl.substring( baseUrl.lastIndexOf( "/" ) + 1 );
+        parsedUri = URI.parse( baseUrl );
+
+        var title = parsedUri.file.substring( 0, parsedUri.file.lastIndexOf( "." ) );
 
         videoElem = document.createElement( "video" );
         videoElem.addEventListener( "loadedmetadata", function() {

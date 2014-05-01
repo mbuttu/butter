@@ -8,7 +8,7 @@
         EditorHelper.init( butter );
 
         butter.listen( "editoropened", function onEditorOpened() {
-          butter.unlisten("editoropened", onEditorOpened);
+          butter.unlisten( "editoropened", onEditorOpened );
           var trackEvent = butter.getTrackEventsByType( "toc" )[ 0 ],
               popcornString = "",
               script;
@@ -60,7 +60,15 @@
                   trackEvent = track.trackEvents[ k ];
 
                   if ( trackEvent.type === "sequencer" ) {
-                    sequencerSources = sequencerSources.concat( trackEvent.popcornOptions.source.concat( trackEvent.popcornOptions.fallback ) );
+                    sequencerSources.push({
+                      base: trackEvent.popcornOptions.base,
+                      path: trackEvent.popcornOptions.path.replace( ".webm", ".mp4" )
+                    });
+
+                    sequencerSources.push({
+                      base: trackEvent.popcornOptions.base,
+                      path: trackEvent.popcornOptions.path
+                    });
                   } else {
                     trackEvents.push({
                       type: trackEvent.type,
@@ -92,10 +100,14 @@
 
         function init( window, document ) {
           var require = requirejs.config({
-            baseUrl: "/"
-          });
+                baseUrl: "/"
+              }),
+              // This flag is used to catch jwplayer errors related to Rackspace Temp-URLs
+              // There is some sort of bug present that causes two errors to be fired.
+              preventSecond = false,
+              fixingTrackEvent = {};
 
-          require(["/templates/fivel/controls.js"], function(Controls) {
+          require(["/templates/fivel/controls.js", "util/xhr"], function(Controls, XHR) {
             function setupControls() {
               var popcorn = butter.currentMedia.popcorn.popcorn;
               var controls = new Controls(popcorn, "[[Course Name]]", "video-container");
@@ -136,6 +148,43 @@
               popcorn.on("pause", function() {
                 $("#resumeDiv").show();
               });
+
+              function onJWError( popcornEvent ) {
+
+                var id = popcornEvent.id,
+                    trackInfo = butter.currentMedia.findTrackWithTrackEventId( id ),
+                    trackEvent = trackInfo.trackEvent;
+
+                if ( trackEvent && !fixingTrackEvent[ id ] ) {
+                  butter.currentMedia.popcorn.popcorn.off( "jwplayer-error", onJWError );
+                  fixingTrackEvent[ id ] = true;
+
+                  XHR.post( "/api/rackspace/tempurl", {
+                    sources: [
+                      {
+                        base: trackEvent.popcornOptions.base,
+                        path: trackEvent.popcornOptions.path
+                      }
+                    ]
+                  }, function( data ) {
+                    trackInfo.track.listen( "trackeventupdated", function onTrackEventUpdated() {
+                      trackInfo.track.unlisten( "trackeventupdated", onTrackEventUpdated );
+
+                      fixingTrackEvent[ id ] = false;
+                      butter.currentMedia.popcorn.popcorn.on( "jwplayer-error", onJWError );
+                    });
+
+                    var file = data[ 0 ].substring( data[ 0 ].lastIndexOf( "/" ) + 1, data[ 0 ].lastIndexOf( "?" ) );
+                    data[ 0 ] = data[ 0 ].replace( file, encodeURIComponent( file ) );
+
+                    trackEvent.update({
+                      source: [ data[ 0 ] ]
+                    });
+                  });
+                }
+              }
+
+              butter.currentMedia.popcorn.popcorn.on( "jwplayer-error", onJWError );
             }
 
             // In this version of Butter when the duration of the timline is increased

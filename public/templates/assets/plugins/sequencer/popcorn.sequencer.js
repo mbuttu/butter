@@ -178,6 +178,7 @@
       // The clip that failed to load would be ignored,
       // and everything else playable.
       options.fail = function() {
+        _this.emit( "jwplayer-error", options );
         options.clearLoading();
         options.failed = true;
         options.setZIndex();
@@ -645,6 +646,14 @@
           "default": 0
         },
         linkback: {
+          hidden: true,
+          "default": ""
+        },
+        base: {
+          hidden: true,
+          "default": ""
+        },
+        path: {
           hidden: true,
           "default": ""
         }

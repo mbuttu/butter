@@ -109,6 +109,12 @@ define( [ "util/lang", "util/uri", "util/xhr", "util/keys", "util/mediatypes", "
         for ( var i = 0, l = _butter.targets.length; i < l; ++i ) {
           _butter.targets[ i ].iframeDiv.style.display = "none";
         }
+
+        popcornOptions.source = URI.makeUnique( URI.stripUnique( popcornOptions.source ).toString() ).toString();
+
+        if ( popcornOptions.fallback ) {
+          popcornOptions.fallback = URI.makeUnique( URI.stripUnique( popcornOptions.fallback ).toString() ).toString();
+        }
       }
     });
   }
@@ -206,20 +212,28 @@ define( [ "util/lang", "util/uri", "util/xhr", "util/keys", "util/mediatypes", "
         thumbnailBtn = el.querySelector( ".mg-thumbnail" ),
         thumbnailImg,
         thumbnailSrc = data.thumbnail,
-        source = data.source;
+        source = data.source,
+        popcornOptions = {
+          source: data.source,
+          denied: data.denied,
+          end: data.duration,
+          thumbnailSrc: thumbnailSrc,
+          from: data.from || 0,
+          title: data.title,
+          duration: data.duration,
+          linkback: data.linkback,
+          base: data.base,
+          path: data.path,
+          hidden: data.hidden || false
+        };
 
     data.duration = ( +data.duration );
 
-    dragNDrop( thumbnailBtn, {
-      source: URI.makeUnique( data.source ).toString(),
-      denied: data.denied,
-      end: data.duration,
-      from: data.from || 0,
-      title: data.title,
-      thumbnailSrc: thumbnailSrc,
-      duration: data.duration,
-      hidden: data.hidden
-    });
+    if ( data.fallback ) {
+      popcornOptions.fallback = [ data.fallback ];
+    }
+
+    dragNDrop( thumbnailBtn, popcornOptions );
 
     thumbnailBtn.setAttribute( "data-popcorn-plugin-type", "sequencer" );
     thumbnailBtn.setAttribute( "data-butter-draggable-type", "plugin" );
@@ -258,19 +272,16 @@ define( [ "util/lang", "util/uri", "util/xhr", "util/keys", "util/mediatypes", "
 
     function addEvent() {
       var start = _butter.currentTime,
-          end = start + data.duration,
-          popcornOptions = {
-            source: URI.makeUnique( data.source ).toString(),
-            denied: data.denied,
-            start: start,
-            end: end,
-            thumbnailSrc: thumbnailSrc,
-            from: data.from || 0,
-            title: data.title,
-            duration: data.duration,
-            linkback: data.linkback,
-            hidden: data.hidden || false
-          };
+          end = start + data.duration;
+
+      popcornOptions.source = URI.makeUnique( URI.stripUnique( data.source ).toString() ).toString();
+
+      if ( popcornOptions.fallback ) {
+        popcornOptions.fallback = URI.makeUnique( URI.stripUnique( data.fallback ).toString() ).toString();
+      }
+
+      popcornOptions.start = start;
+      popcornOptions.end = end;
 
       options.callback = options.callback || addMediaEvent;
       options.callback( popcornOptions, data );
@@ -726,6 +737,29 @@ define( [ "util/lang", "util/uri", "util/xhr", "util/keys", "util/mediatypes", "
       }
     }, false );
 
+    function buildClip( result, container ) {
+      if ( !result.duration ) {
+        MediaUtils.getMetaData( result.source, function( clip ) {
+          clip.base = result.base;
+          clip.path = result.path;
+          // TODO: Determine issues with creating clips that include fallbacks that are given
+          // clip.fallback = result.fallback;
+
+          addMedia( clip, {
+            container: container,
+            callback: addMediaCallback
+          }, function( msg ) {
+            console.warn( "Failed to find matching video type: " + msg );
+          });
+        });
+      } else {
+        addMedia( result, {
+          container: container,
+          callback: addMediaCallback
+        });
+      }
+    }
+
     function rackspaceSearchCallback( noPrefix ) {
       var container = _itemContainers.Rackspace,
           value = _rackspaceInput.value,
@@ -757,22 +791,29 @@ define( [ "util/lang", "util/uri", "util/xhr", "util/keys", "util/mediatypes", "
             for ( var k = 0; k < data.results.length; k++ ) {
               result = data.results[ k ];
 
+              // First is WEBM, second is MP4
+              var sources = [
+                    {
+                      base: result.base,
+                      path: result.path
+                    },
+                    {
+                      base: result.base,
+                      path: result.path.replace( ".webm", ".mp4" )
+                    }
+                  ];
+
               if ( result.contentType.indexOf( "image" ) === -1 ) {
-                if ( !result.duration ) {
-                  MediaUtils.getMetaData( result.source, function( clip ) {
-                    addMedia( clip, {
-                      container: container,
-                      callback: addMediaCallback
-                    }, function( msg ) {
-                      console.warn( "Failed to find matching video type: " + msg );
-                    });
-                  });
-                } else {
-                  addMedia( result, {
-                    container: container,
-                    callback: addMediaCallback
-                  });
-                }
+                XHR.post( "/api/rackspace/tempurl", { sources: sources }, function( data ) {
+                  if ( data.error ) {
+                    console.warn( data.error );
+                    return;
+                  }
+
+                  result.source = URI.makeUnique( data[ 0 ] ).toString();
+                  result.fallback = URI.makeUnique( data[ 1 ] ).toString();
+                  buildClip( result, container );
+                });
               } else {
                 addPhotos( result, {
                   container: container,
