@@ -12,15 +12,6 @@
 
   document.getElementsByTagName( "head" )[ 0 ].appendChild( importMousetrap );
 
-  function stopPropagation( e ) {
-    if ( e.preventDefault ) {
-      e.preventDefault();
-    } else {
-      e.returnValue = false;
-    }
-    e.stopPropagation();
-  }
-
   var isMouseTrapLoaded = function() {
     if ( window.Mousetrap ) {
       _mousetrapLoaded = true;
@@ -876,6 +867,15 @@
       _setup: function( options ) {
         options._mousetrapLoaded = _mousetrapLoaded;
 
+        options.stopPropagation = function stopPropagation( e ) {
+          if ( e.preventDefault ) {
+            e.preventDefault();
+          } else {
+            e.returnValue = false;
+          }
+          e.stopPropagation();
+        };
+
         var isHelperReady = function(){
           if ( _mousetrapHelper ) {
             // Cache mousetrap helper & sequence arrays
@@ -912,8 +912,7 @@
         };
       },
       start: function( event, options ) {
-        var that = this,
-            isEditor = options.isEditor;
+        var that = this;
 
         var isHelperReady = function() {
           if ( _mousetrapHelper ) {
@@ -932,9 +931,8 @@
               }
             }
 
-            if ( !isEditor ) {
-              window.addEventListener( "keydown", stopPropagation, false );
-            }
+            window.addEventListener( "keydown", options.stopPropagation, false );
+
             that.pause();
           } else {
             setTimeout(function(){
@@ -946,8 +944,7 @@
         isHelperReady();
       },
       end: function( event, options ) {
-        var that = this,
-            isEditor = options.isEditor;
+        var that = this;
 
         var isHelperReady = function() {
           if ( _mousetrapHelper ) {
@@ -960,9 +957,7 @@
               _mousetrapHelper.unbindSequence( sequences.macSequence );
             }
 
-            if ( !isEditor ) {
-              window.removeEventListener( "keydown", stopPropagation, false );
-            }
+            window.removeEventListener( "keydown", options.stopPropagation, false );
           } else {
             setTimeout(function(){
               isHelperReady();
