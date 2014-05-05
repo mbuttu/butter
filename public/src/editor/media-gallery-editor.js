@@ -760,6 +760,46 @@ define( [ "util/lang", "util/uri", "util/xhr", "util/keys", "util/mediatypes", "
       }
     }
 
+    function addClipElements( results ) {
+      var result = results.shift();
+
+      if ( !result ) {
+        return;
+      }
+
+      // First is WEBM, second is MP4
+      var sources = [
+            {
+              base: result.base,
+              path: result.path
+            },
+            {
+              base: result.base,
+              path: result.path.replace( ".webm", ".mp4" )
+            }
+          ];
+
+      if ( result.contentType.indexOf( "image" ) === -1 ) {
+        XHR.post( "/api/rackspace/tempurl", { sources: sources }, function( data ) {
+          if ( data.error ) {
+            console.warn( data.error );
+            return;
+          }
+
+          result.source = URI.makeUnique( data[ 0 ] ).toString();
+          result.fallback = URI.makeUnique( data[ 1 ] ).toString();
+          buildClip( result, _itemContainers.Rackspace );
+          addClipElements( results );
+        });
+      } else {
+        addPhotos( result, {
+          container: container,
+          callback: addPhotoCallback
+        });
+        addClipElements( results );
+      }
+    }
+
     function rackspaceSearchCallback( noPrefix ) {
       var container = _itemContainers.Rackspace,
           value = _rackspaceInput.value,
@@ -786,42 +826,7 @@ define( [ "util/lang", "util/uri", "util/xhr", "util/keys", "util/mediatypes", "
           container.setAttribute( "data-total", data.total );
 
           if ( data.results && data.results.length ) {
-            var result;
-
-            for ( var k = 0; k < data.results.length; k++ ) {
-              result = data.results[ k ];
-
-              // First is WEBM, second is MP4
-              var sources = [
-                    {
-                      base: result.base,
-                      path: result.path
-                    },
-                    {
-                      base: result.base,
-                      path: result.path.replace( ".webm", ".mp4" )
-                    }
-                  ];
-
-              if ( result.contentType.indexOf( "image" ) === -1 ) {
-                XHR.post( "/api/rackspace/tempurl", { sources: sources }, function( data ) {
-                  if ( data.error ) {
-                    console.warn( data.error );
-                    return;
-                  }
-
-                  result.source = URI.makeUnique( data[ 0 ] ).toString();
-                  result.fallback = URI.makeUnique( data[ 1 ] ).toString();
-                  buildClip( result, container );
-                });
-              } else {
-                addPhotos( result, {
-                  container: container,
-                  callback: addPhotoCallback
-                });
-              }
-            }
-
+            addClipElements( data.results );
           }
 
           _this.scrollbar.update();
