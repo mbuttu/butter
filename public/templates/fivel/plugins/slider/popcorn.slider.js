@@ -331,7 +331,7 @@
       parsedText = parsedText || [];
 
       if ( !string ) {
-        return null;
+        return parsedText;
       }
 
       matches = descriptionRegex.exec( string );
