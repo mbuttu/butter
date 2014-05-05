@@ -100,14 +100,14 @@
 
         function init( window, document ) {
           var require = requirejs.config({
-                baseUrl: "/"
+                baseUrl: "/src"
               }),
               // This flag is used to catch jwplayer errors related to Rackspace Temp-URLs
               // There is some sort of bug present that causes two errors to be fired.
               preventSecond = false,
               fixingTrackEvent = {};
 
-          require(["/templates/fivel/controls.js", "util/xhr"], function(Controls, XHR) {
+          require(["../templates/fivel/controls", "util/xhr"], function(Controls, XHR) {
             function setupControls() {
               var popcorn = butter.currentMedia.popcorn.popcorn;
               var controls = new Controls(popcorn, "[[Course Name]]", "video-container");
