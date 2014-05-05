@@ -16,17 +16,12 @@
         _mousetrapHelper,
         _popcorn = butter.currentMedia.popcorn.popcorn;
 
-    function stopPropagation( e ) {
-      e.preventDefault();
-      e.stopPropagation();
-    }
-
     function blockShortcuts() {
-      window.addEventListener( "keydown", stopPropagation, false );
+      window.addEventListener( "keydown", _trackEvent.popcornTrackEvent.stopPropagation, false );
     }
 
     function unblockShortcuts() {
-      window.removeEventListener( "keydown", stopPropagation, false );
+      window.removeEventListener( "keydown", _trackEvent.popcornTrackEvent.stopPropagation, false );
     }
 
     /**
@@ -138,9 +133,9 @@
     // Extend this object to become a TrackEventEditor
     Butter.Editor.TrackEventEditor.extend( _this, butter, rootElement, {
       open: function( parentElement, trackEvent ) {
+        _trackEvent = trackEvent;
         // Update properties when TrackEvent is updated
         trackEvent.listen( "trackeventupdated", onTrackEventUpdated );
-        trackEvent.popcornTrackEvent.isEditor = true;
         setup( trackEvent );
       },
       close: function() {
