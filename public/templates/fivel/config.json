@@ -53,5 +53,8 @@
       }
     ]
   },
-  "maxPluginZIndex": 1000
+  "maxPluginZIndex": 1000,
+  "pluginPreviewBlacklist": [
+    "toc"
+  ]
 }

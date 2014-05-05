@@ -201,11 +201,14 @@ define([ "util/lang", "util/keys", "util/time", "./base-editor", "ui/widget/tool
       var startTime = trackEvent.popcornOptions.start,
           endTime = trackEvent.popcornOptions.end,
           currentTime = butter.currentTime,
-          accuracy = startTime * Math.pow( 10, TimeUtils.timeAccuracy - 1 );
+          accuracy = startTime * Math.pow( 10, TimeUtils.timeAccuracy - 1 ),
+          pluginPreviewBlacklist = butter.config.value( "pluginPreviewBlacklist" );
 
-      if ( currentTime < startTime || currentTime > endTime ) {
-        // Account for accuracy
-        butter.currentTime = startTime === 0 ? startTime : Math.ceil( startTime * accuracy ) / accuracy;
+      if ( pluginPreviewBlacklist.indexOf( trackEvent.type ) === -1 ) {
+        if ( currentTime < startTime || currentTime > endTime ) {
+          // Account for accuracy
+          butter.currentTime = startTime === 0 ? startTime : Math.ceil( startTime * accuracy ) / accuracy;
+        }
       }
     };
 
