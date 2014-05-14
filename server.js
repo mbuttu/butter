@@ -74,7 +74,8 @@ app.configure( function() {
     .use( requirejsMiddleware({
       src: WWW_ROOT,
       dest: tmpDir,
-      once: optimize,
+      debug: config.DEBUG,
+      once: config.OPTIMIZE_JS,
       modules: {
         "/src/butter.js": {
           include: [ "butter" ],
@@ -88,9 +89,9 @@ app.configure( function() {
           include: [ "webmakernav" ],
           mainConfigFile: WWW_ROOT + "/src/webmakernav.js",
         },
-        "/templates/fivel/ready.js": {
+        "/src/ready.js": {
           include: [ "ready" ],
-          mainConfigFile: WWW_ROOT + "/templates/fivel/ready.js"
+          mainConfigFile: WWW_ROOT + "/src/ready.js"
         }
       },
       defaults: {
