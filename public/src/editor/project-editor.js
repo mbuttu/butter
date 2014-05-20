@@ -223,6 +223,12 @@ define([ "editor/editor", "editor/base-editor",
           var publishDate = new Date( data.course.publishDate ),
               expiryDate;
 
+          Popcorn.extend(lmOptions, data.course);
+
+          lmOptions.tags = lmOptions.tags.map(function(tag) {
+            return tag.id;
+          }).join(",");
+
           data.course.publishDate = ( publishDate.getMonth() + 1 ) + "/" + publishDate.getDate() + "/" + publishDate.getFullYear();
 
           if ( data.course.expiryDate ) {
