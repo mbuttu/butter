@@ -365,7 +365,7 @@ function authenticateFivel( res, callback ) {
     if ( err || body.error ) {
       console.log( err || body.error );
       return res.json( 500, {
-        error: body.error.message || "An error occured."
+        error: ( body && body.error && body.error.message ) || "An error occured."
       });
     }
 
@@ -492,7 +492,7 @@ app.put( "/api/fivel/course", function( req, res ) {
           if ( err || body.error ) {
             return res.json( 500, {
               error: err,
-              message: ( body.error && ( body.error.message || body.error.err ) ) || "Something went wrong"
+              message: ( body && body.error && ( body.error.message || body.error.err ) ) || "Something went wrong"
             });
           }
 
