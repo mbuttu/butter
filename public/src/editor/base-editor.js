@@ -215,19 +215,27 @@ define( [ "core/eventmanager", "util/scrollbars", "ui/widget/tooltip", "ui/widge
      * Sets the error state of the editor, making an error message visible.
      *
      * @param {String} message: Error message to display.
+     * @param {String} classString: Class to toggle a "success" or "error" case. Defaults to "error"
      */
-    extendObject.setErrorState = function( message ) {
+    extendObject.setErrorState = function( message, classString ) {
+      classString = classString || "error";
+
+      var removeClass = classString === "error" ? "success" : "error";
+
       if ( message && _errorMessageContainer ) {
         _errorMessageContainer.innerHTML = message;
         _errorMessageContainer.parentNode.style.height = _errorMessageContainer.offsetHeight + "px";
         _errorMessageContainer.parentNode.style.visibility = "visible";
         _errorMessageContainer.parentNode.classList.add( "open" );
+        _errorMessageContainer.parentNode.classList.add( classString );
+        _errorMessageContainer.parentNode.classList.remove( removeClass );
       }
       else {
         _errorMessageContainer.innerHTML = "";
         _errorMessageContainer.parentNode.style.height = "";
         _errorMessageContainer.parentNode.style.visibility = "";
         _errorMessageContainer.parentNode.classList.remove( "open" );
+        _errorMessageContainer.parentNode.classList.remove( classString );
       }
     };
 

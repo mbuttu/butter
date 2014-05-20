@@ -7,10 +7,12 @@
       </div>
   </div>
   <ul class="butter-editor-tabs">
-    <li><a class="butter-btn project-tab butter-active" href="#" data-tab-name="settings">Settings</a></li>
-    <li><a class="butter-btn project-tab share-tab-btn" href="#" data-tab-name="share">Share</a></li>
-    <li><a class="butter-btn project-tab embed-tab-btn" href="#" data-tab-name="embed">Embed</a></li>
-    <li><a class="butter-btn butter-view-source-btn" target="_blank" data-tab-name="view-source">View Source</a></li>
+    <li><a class="butter-btn project-tab butter-hidden" href="#" data-tab-name="settings">Settings</a></li>
+    <li><a class="butter-btn project-tab share-tab-btn butter-hidden" href="#" data-tab-name="share">Share</a></li>
+    <li><a class="butter-btn project-tab embed-tab-btn butter-hidden" href="#" data-tab-name="embed">Embed</a></li>
+    <li><a class="butter-btn project-tab butter-active" href="#" data-tab-name="fivel">Required</a></li>
+    <li><a class="butter-btn project-tab" href="#" data-tab-name="optional">Optional</a></li>
+    <li><a class="butter-btn butter-view-source-btn butter-hidden" target="_blank" data-tab-name="view-source">View Source</a></li>
   </ul>
   <div class="butter-editor-body butter-tabs-spacing scrollbar-container">
     <div class="scrollbar-outer scrollbar-inner">
@@ -19,7 +21,7 @@
       </div>
 
       <!-- Settings Container -->
-      <div class="settings-container editor-container">
+      <div class="settings-container editor-container display-off">
         <label>Author</label>
         <input class="butter-project-author" type="text" placeholder="Anonymous">
         <label>Description</label>
@@ -53,6 +55,39 @@
         <textarea class="butter-project-embed-url" readonly="readonly"></textarea>
         <p>Copy and paste this embed code into any webpage</p>
       </div>
+
+      <div class="fivel-container editor-container">
+        <label>URL Extension Name</label>
+        <input type="text" class="learning-moment-friendlyName" placeholder="google-search-101">
+        <label>Learning Moment Name</label>
+        <input type="text" class="learning-moment-name" placeholder="Google Search: 101">
+        <label>Credit Cost</label>
+        <input type="number" class="learning-moment-cost" placeholder="10">
+        <label>Docket #</label>
+        <input type="text" class="learning-moment-docket" placeholder="GGGS001">
+        <label>Publish Date</label>
+        <input type="text" class="learning-moment-publish" placeholder="">
+        <label>Suppliers</label>
+        <select class="learning-moment-suppliers"></select>
+        <label>Tags</label>
+        <input type="text" class="learning-moment-tags" placeholder="">
+        <label>Learning Moment Image</label>
+        <input type="file" class="learning-moment-image" placeholder="" accept="image/png">
+        <img class="learning-moment-image-preview butter-hidden" alt="lm image"/>
+        <label>Description</label>
+        <div class="description-wrapper">
+          <textarea class="butter-project-description learning-moment-description" maxlength="200" placeholder="In this learning moment...."></textarea>
+        </div>
+      </div>
+
+      <div class="optional-container editor-container display-off">
+        <label>Expiry Date</label>
+        <input type="text" class="learning-moment-expiry" placeholder="">
+        <label>Internal Notes</label>
+        <input type="text" class="learning-moment-internal-notes" placeholder="">
+      </div>
+
+      <button class="learning-moment-submit butter-btn btn-light">Submit LM</button>
 
     </div>
   </div>

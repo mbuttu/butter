@@ -26,6 +26,8 @@ define( [ "core/eventmanager", "core/media", "util/sanitizer" ],
         // more correct.
         _isPublished = false,
 
+        _courseId,
+
         // How often to backup data in ms. If 0, no backups are done.
         _backupIntervalMS = butter.config.value( "backupInterval" )|0,
 
@@ -72,6 +74,15 @@ define( [ "core/eventmanager", "core/media", "util/sanitizer" ],
           }
         },
         enumerable: true
+      },
+
+      "courseId": {
+        get: function() {
+          return _courseId;
+        },
+        set: function( val ) {
+          _courseId = val;
+        }
       },
 
       "template": {
@@ -249,6 +260,10 @@ define( [ "core/eventmanager", "core/media", "util/sanitizer" ],
 
       if ( json.publishUrl ) {
         _publishUrl = json.publishUrl;
+      }
+
+      if ( json.courseId ) {
+        _courseId = json.courseId;
       }
 
       if ( json.iframeUrl ) {
