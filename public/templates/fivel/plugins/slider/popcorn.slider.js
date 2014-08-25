@@ -481,7 +481,7 @@
           type: "number",
           label: "Y Position",
           "units": "%",
-          "default": 60
+          "default": 70
         },
         transition: {
           elem: "select",
