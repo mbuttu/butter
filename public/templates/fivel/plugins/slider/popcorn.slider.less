@@ -26,49 +26,41 @@
 
 .slider-outer {
   position: absolute;
-  width: 80%;
-  height: 30%;
-  font-size: 0.9em;
+  width: 70%;
+  height: 23%;
+  font-size: 0.8em;
 
   .slider-inner {
-    border-top-right-radius: 5px;
-    border-bottom-right-radius: 5px;
     overflow: hidden;
     position: absolute;
-    left: 25%;
+    left: 20%;
     top: 0;
-    width: 75%;
+    width: 80%;
     height: 100%;
+    padding-right: 0.5em;
 
     > h2 {
       margin: 0;
+      margin-bottom: 0.3em;
       line-height: normal;
-      margin-left: 5%;
-      font-size: 1.4rem;
+      font-size: 16px;
       font-weight: bold;
       font-family: "Open Sans", "Helvetica Neue", sans-serif;
     }
     > p {
       margin: 0;
-      margin-left: 5%;
       line-height: normal;
-      font-size: 0.9rem;
-      font-style: italic;
+      font-size: 1em;
     }
   }
 
   .slider-icon {
-    border-top-left-radius: 5px;
-    border-bottom-left-radius: 5px;
     position: absolute;
-    width: 25%;
+    width: 20%;
     height: 100%;
-    top: 0;
-    left: 0;
 
     > img {
       position: absolute;
-      width: 80%;
       height: 80%;
       top: 10%;
       left: 10%;
@@ -77,6 +69,10 @@
 
   .slider-instructions {
     font-size: 0.8em;
+  }
+
+  .slider-description {
+    margin-bottom: 0em;
   }
 }
 
@@ -95,7 +91,7 @@
   &.slider-outer {
     margin: -1px;
     background: white;
-    border: 1px solid black;
+    border: 1px solid #cacaca;
     color: black;
 
     > .slider-inner {
@@ -106,9 +102,9 @@
 
 .popcorn-slider-dark {
   &.slider-outer {
-    background: black;
+    background: #363636;
     color: white;
-    border: 1px dotted white;
+    border: 1px solid black;
 
     > .slider-inner {
       font-size: 100%;
