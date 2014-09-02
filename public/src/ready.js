@@ -44,6 +44,58 @@
               openData: trackEvent
             });
           });
+
+          var exportButton = document.getElementById( "export" );
+          exportButton.addEventListener( "click", function( e ) {
+            var mediaData = butter.currentMedia.json,
+                sequencerSources = [],
+                trackEvents = [],
+                track, trackEvent;
+
+            for ( var i = 0; i < mediaData.tracks.length; i++ ) {
+              track = mediaData.tracks[ i ];
+
+              if ( track.trackEvents.length ) {
+                for ( var k = 0; k < track.trackEvents.length; k++ ) {
+                  trackEvent = track.trackEvents[ k ];
+
+                  if ( trackEvent.type === "sequencer" ) {
+                    sequencerSources.push({
+                      base: trackEvent.popcornOptions.base,
+                      path: trackEvent.popcornOptions.path.replace( ".webm", ".mp4" )
+                    });
+
+                    sequencerSources.push({
+                      base: trackEvent.popcornOptions.base,
+                      path: trackEvent.popcornOptions.path
+                    });
+                  } else {
+                    trackEvents.push({
+                      type: trackEvent.type,
+                      popcornOptions: trackEvent.popcornOptions
+                    });
+                  }
+                }
+              }
+            }
+
+            popcornString = JSON.stringify({
+              sources: sequencerSources,
+              trackEvents: trackEvents
+            }, null, 2 );
+
+            butter.dialog.spawn( "export", {
+              data: {
+                popcornString: popcornString,
+                sendToServerCallback: sendToServer
+              },
+              events: {
+                cancel: function( e ){
+                  dialg.close();
+                }
+              }
+            }).open();
+          });
         });
 
         function init( window, document ) {
