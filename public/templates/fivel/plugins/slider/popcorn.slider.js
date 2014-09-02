@@ -547,11 +547,8 @@
       header.classList.add( "slider-header" );
       description.classList.add( "slider-description" );
 
-      // Check that description has been parsed
-      if ( !( finalCode && typeof( finalCode.push ) === "function" ) ) {
-        descriptionHelper.parseDescription( options.description );
-        finalCode = descriptionHelper.finalCode();
-      }
+      descriptionHelper.parseDescription( options.description );
+      finalCode = descriptionHelper.finalCode();
 
       // Construct final version of description
       if ( finalCode && finalCode.length ) {
