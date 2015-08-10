@@ -35,6 +35,7 @@
         section.title = sections[ idx ].querySelector( ".toc-section-title" ).value;
         section.time = sections[ idx ].querySelector( ".toc-section-time" ).value;
         section.description = sections[ idx ].querySelector( ".toc-section-description" ).value;
+        section.useDuration = sections[ idx ].querySelector( ".toc-section-use-duration" ).value === "true";
         updateOptions.sections.push( section );
       }
 
@@ -86,7 +87,7 @@
     }
 
     function addSection( section ) {
-      var sectionHTML, title, time, description, removeButton;
+      var sectionHTML, title, time, description, removeButton, useDuration;
 
       // Adding a new section
       if ( !section ) {
@@ -107,6 +108,8 @@
       time.value = section.time;
       description = sectionHTML.querySelector( ".toc-section-description" );
       description.innerHTML = section.description;
+      useDuration = sectionHTML.querySelector( ".toc-section-use-duration" );
+      useDuration.value = section.useDuration;
       _elements.sections.appendChild( sectionHTML );
     }
 
@@ -137,7 +140,6 @@
         _trackEvent = trackEvent;
         _popcornOptions = _trackEvent.popcornOptions;
         _this.applyExtraHeadTags( compiledLayout );
-        butter.listen( "trackeventupdated", onEditorOpen );
         onEditorOpen();
       },
       close: function(){
