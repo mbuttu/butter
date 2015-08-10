@@ -2,6 +2,18 @@
 
 (function ( Popcorn ) {
 
+  // From public/src/util/lang.js
+  function secondsToSMPTE( time ) {
+    var timeStamp = new Date( 1970, 0, 1 ),
+        seconds;
+    timeStamp.setSeconds( time );
+    seconds = timeStamp.toTimeString().substr( 0, 8 );
+    if( seconds > 86399 ){
+      seconds = Math.floor( (timeStamp - Date.parse("1/1/70") ) / 3600000) + seconds.substr(2);
+    }
+    return seconds;
+  }
+
   // Polyfill for classList in browsers that don't support it.
   // see https://developer.mozilla.org/en-US/docs/Web/API/Element.classList
   /*global self, document, DOMException */
@@ -336,18 +348,57 @@
         options.sections = options.sections || [];
 
         options.sections.sort( function( a, b ) {
+          if ( a.time === "{{duration}}" ) {
+            return 1;
+          }
+
+          if ( b.time === "{{duration}}" ) {
+            return -1;
+          }
+
+          if ( a.time === "{{duration}}" && b.time === "{{duration}}" ) {
+            return 0;
+          }
+
           return Popcorn.util.toSeconds( a.time ) - Popcorn.util.toSeconds( b.time );
         });
 
-        options.popcorn.on( "ended", onEnded );
-
-        for ( var idx = 0; idx < options.sections.length; idx++ ) {
-          var section = options.sections[ idx ],
-              nextSection = options.sections[ idx + 1 ];
-          setupCue( section, nextSection ? nextSection.time : Math.floor( options.popcorn.duration() ) );
+        function addDurationIfNeeded( section ) {
+          // The first time the TOC is loaded, the section that contains the
+          // duration will actually contain the string "{{duration}}".
+          if ( section && ( section.time === "{{duration}}" || section.useDuration ) ) {
+            // Since `section.time` is being rewritten from {{duration}} to the
+            // actual duration of the video the first time the TOC is loaded,
+            // add the `useDuration` property that will signal this section
+            // should update its duration if the video source changes.
+            //
+            // Without this property, the `section.time` will always include
+            // the time "30" from the base video that's loaded in the editor.
+            section.useDuration = true;
+            section.time = secondsToSMPTE( options.popcorn.duration() );
+          }
         }
 
-        options.popcorn.on( "seeking", onSeeking );
+        function ready() {
+          for ( var idx = 0; idx < options.sections.length; idx++ ) {
+            var section = options.sections[ idx ],
+                nextSection = options.sections[ idx + 1 ];
+
+            addDurationIfNeeded(section);
+            addDurationIfNeeded(nextSection);
+
+            setupCue( section, nextSection ? nextSection.time : Math.floor( options.popcorn.duration() ) );
+          }
+
+          options.popcorn.on( "seeking", onSeeking );
+          options.popcorn.on( "ended", onEnded );
+        }
+
+        if (options.popcorn.readyState() >= 1) {
+          ready();
+        } else {
+          options.popcorn.on("loadedmetadata", ready);
+        }
 
         function onEnded() {
           if ( !canBeCompleted ) {
@@ -508,6 +559,9 @@
         elem: "input",
         type: "text",
         label: "Out"
+      },
+      useDuration: {
+        hidden: true
       },
       title: {
         elem: "input",

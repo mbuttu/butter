@@ -34,23 +34,43 @@
                 "sections": [
                   {
                     "time": "00:00",
-                    "title": "Intro",
-                    "description": "This is the introduction."
+                    "title": "Introduction",
+                    "description": ""
                   },
                   {
-                    "time": "00:05",
+                    "time": "01:00",
+                    "title": "Insight 1",
+                    "description": ""
+                  },
+                  {
+                    "time": "01:45",
+                    "title": "Insight 2",
+                    "description": ""
+                  },
+                  {
+                    "time": "02:30",
+                    "title": "Insight 3",
+                    "description": ""
+                  },
+                  {
+                    "time": "03:15",
+                    "title": "Insight 4",
+                    "description": ""
+                  },
+                  {
+                    "time": "04:00",
+                    "title": "Insight 5",
+                    "description": ""
+                  },
+                  {
+                    "time": "04:30",
+                    "title": "Review",
+                    "description": ""
+                  },
+                  {
+                    "time": "{{duration}}",
                     "title": "Quiz",
-                    "description": "Quiz about tips in this video."
-                  },
-                  {
-                    "time": "00:06",
-                    "title": "Section 2",
-                    "description": "This is the second section."
-                  },
-                  {
-                    "time": "00:10",
-                    "title": "Section 3",
-                    "description": "This is the third section"
+                    "description": ""
                   }
                 ]
               }
