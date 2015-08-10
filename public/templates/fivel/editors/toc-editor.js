@@ -65,7 +65,7 @@
         });
       }
 
-      for ( var idx = 0; idx < _popcornOptions.sections.length; idx++ ) {
+      for ( var idx = _popcornOptions.sections.length - 1; idx >= 0; idx-- ) {
         var section = _popcornOptions.sections[ idx ];
         addSection( section );
       }
@@ -94,7 +94,7 @@
         section = {
           title: "Section Title",
           time: "00:00",
-          description: "Section description."
+          description: ""
         };
       }
 
@@ -110,7 +110,7 @@
       description.innerHTML = section.description;
       useDuration = sectionHTML.querySelector( ".toc-section-use-duration" );
       useDuration.value = section.useDuration;
-      _elements.sections.appendChild( sectionHTML );
+      _elements.sections.insertBefore( sectionHTML, _elements.sections.firstChild );
     }
 
     function removeSection( container, div ){
