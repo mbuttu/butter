@@ -233,6 +233,12 @@
 
         function linkElement( a, start ) {
           return function( e ) {
+
+            // 1 = left mouse button, 13 = enter key
+            if (e.which !== 1 && e.which !== 13) {
+              return;
+            }
+
             // Temporarily remove the listener to the seek event
             options.popcorn.off( "seeking", onSeeking );
             activate( a );
@@ -293,9 +299,11 @@
             duration = minutes + ":" + seconds;
           }
 
+          a.setAttribute( "tabindex", "0" );
           a.innerHTML = section.title + "<span class=\"section-incomplete\">\u00A0\u00A0</span><span class=\"time-string\">" + duration + "</span> ";
 
           a.addEventListener( "click", linkElement( a, start ), false );
+          a.addEventListener( "keydown", linkElement( a, start ), false );
 
           defn.innerHTML = section.description;
           defn.classList.add( "section-description" );
