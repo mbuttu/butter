@@ -118,6 +118,7 @@
         if ( container.firstChild !== container.lastChild ){
           container.removeChild( div );
           updateTrackEvent();
+          container.firstChild.querySelector("input").focus();
         }
       };
     }
