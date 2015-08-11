@@ -267,8 +267,7 @@
 
           // Format the duration
           //
-          // FIXME: Checking if duration === 1 is an assumption.
-          // If the duration is 1, then it's a quiz, so don't display the duration.
+          // Don't display the duration if it's <= 1.
           function formatTime(time) {
             time = +time;
             if ( time === 0 ) {
@@ -283,12 +282,12 @@
           }
 
           duration = Math.floor( duration );
-          if ( duration === 1 ) {
+          if ( duration <= 1 ) {
             duration = "";
           } else if ( duration < 60 ) {
-            duration = "00:" + formatTime(duration);
+            duration = "00:" + formatTime( duration );
           } else {
-            seconds = formatTime(duration % 60);
+            seconds = formatTime( duration % 60 );
             minutes = formatTime( ( duration - seconds ) / 60 );
 
             duration = minutes + ":" + seconds;
